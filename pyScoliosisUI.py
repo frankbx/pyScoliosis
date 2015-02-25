@@ -11,14 +11,17 @@ import wx
 import wx.xrc
 import wx.grid
 
+wx.ID_2 = 1000
+wx.ID_1 = 1001
+
 ###########################################################################
-## Class mainForm
+## Class MainFormBase
 ###########################################################################
 
-class mainForm(wx.Frame):
+class MainFormBase(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"脊柱侧凸预防干预信息系统", pos=wx.DefaultPosition,
-                          size=wx.Size(800, 600), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+                          size=wx.Size(900, 600), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
@@ -36,7 +39,7 @@ class mainForm(wx.Frame):
 
         # Grid
         self.patientDataTable.CreateGrid(5, 7)
-        self.patientDataTable.EnableEditing(True)
+        self.patientDataTable.EnableEditing(False)
         self.patientDataTable.EnableGridLines(True)
         self.patientDataTable.EnableDragGridSize(False)
         self.patientDataTable.SetMargins(0, 0)
@@ -48,6 +51,7 @@ class mainForm(wx.Frame):
         self.patientDataTable.SetColLabelAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
 
         # Rows
+        self.patientDataTable.AutoSizeRows()
         self.patientDataTable.EnableDragRowSize(True)
         self.patientDataTable.SetRowLabelSize(80)
         self.patientDataTable.SetRowLabelAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
@@ -55,6 +59,8 @@ class mainForm(wx.Frame):
         # Label Appearance
 
         # Cell Defaults
+        self.patientDataTable.SetDefaultCellFont(
+            wx.Font(wx.NORMAL_FONT.GetPointSize(), 70, 93, 90, False, wx.EmptyString))
         self.patientDataTable.SetDefaultCellAlignment(wx.ALIGN_LEFT, wx.ALIGN_TOP)
         bSizer1.Add(self.patientDataTable, 1, wx.ALL | wx.EXPAND, 0)
 
@@ -69,7 +75,7 @@ class mainForm(wx.Frame):
         self.lblSchool.Wrap(-1)
         gbSizer1.Add(self.lblSchool, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 5)
 
-        self.txtSchool = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+        self.txtSchool = wx.TextCtrl(self.operationPanel, wx.ID_2, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                      0)
         gbSizer1.Add(self.txtSchool, wx.GBPosition(1, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
 
@@ -119,8 +125,8 @@ class mainForm(wx.Frame):
         self.lblDistrict.Wrap(-1)
         gbSizer1.Add(self.lblDistrict, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
 
-        self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                       wx.DefaultSize, 0)
+        self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_1, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                       0)
         gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
 
         self.btnSearch = wx.Button(self.operationPanel, wx.ID_ANY, u"查找", wx.DefaultPosition, wx.DefaultSize, 0)

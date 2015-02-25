@@ -42,9 +42,9 @@
             <property name="id">wxID_ANY</property>
             <property name="maximum_size"></property>
             <property name="minimum_size"></property>
-            <property name="name">mainForm</property>
+            <property name="name">MainFormBase</property>
             <property name="pos"></property>
-            <property name="size">800,600</property>
+            <property name="size">900,600</property>
             <property name="style">wxDEFAULT_FRAME_STYLE</property>
             <property name="subclass"></property>
             <property name="title">脊柱侧凸预防干预信息系统</property>
@@ -204,13 +204,13 @@
                         <property name="aui_position"></property>
                         <property name="aui_row"></property>
                         <property name="autosize_cols">0</property>
-                        <property name="autosize_rows">0</property>
+                        <property name="autosize_rows">1</property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="cell_bg"></property>
-                        <property name="cell_font"></property>
+                        <property name="cell_font">,93,90,-1,70,0</property>
                         <property name="cell_horiz_alignment">wxALIGN_LEFT</property>
                         <property name="cell_text"></property>
                         <property name="cell_vert_alignment">wxALIGN_TOP</property>
@@ -232,7 +232,7 @@
                         <property name="drag_col_size">1</property>
                         <property name="drag_grid_size">0</property>
                         <property name="drag_row_size">1</property>
-                        <property name="editing">1</property>
+                        <property name="editing">0</property>
                         <property name="enabled">1</property>
                         <property name="fg"></property>
                         <property name="floatable">1</property>
@@ -542,7 +542,7 @@
                                     <property name="font"></property>
                                     <property name="gripper">0</property>
                                     <property name="hidden">0</property>
-                                    <property name="id">wxID_ANY</property>
+                                    <property name="id">wxID_2</property>
                                     <property name="max_size"></property>
                                     <property name="maximize_button">0</property>
                                     <property name="maximum_size"></property>
@@ -1622,7 +1622,7 @@
                                     <property name="font"></property>
                                     <property name="gripper">0</property>
                                     <property name="hidden">0</property>
-                                    <property name="id">wxID_ANY</property>
+                                    <property name="id">wxID_1</property>
                                     <property name="max_size">350,-1</property>
                                     <property name="maximize_button">0</property>
                                     <property name="maximum_size"></property>
