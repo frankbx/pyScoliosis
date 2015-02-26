@@ -11,8 +11,8 @@ import wx
 import wx.xrc
 import wx.grid
 
-wx.ID_2 = 1000
-wx.ID_1 = 1001
+wx.ID_1 = 1000
+wx.ID_2 = 1001
 
 ###########################################################################
 ## Class MainFormBase
@@ -21,7 +21,7 @@ wx.ID_1 = 1001
 class MainFormBase(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"脊柱侧凸预防干预信息系统", pos=wx.DefaultPosition,
-                          size=wx.Size(900, 600), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+                          size=wx.Size(1024, 768), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
@@ -35,7 +35,7 @@ class MainFormBase(wx.Frame):
         bSizer1 = wx.BoxSizer(wx.HORIZONTAL)
 
         self.patientDataTable = wx.grid.Grid(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-                                             wx.RAISED_BORDER | wx.VSCROLL)
+                                             wx.HSCROLL | wx.RAISED_BORDER | wx.VSCROLL)
 
         # Grid
         self.patientDataTable.CreateGrid(5, 7)
@@ -74,6 +74,10 @@ class MainFormBase(wx.Frame):
         self.lblSchool = wx.StaticText(self.operationPanel, wx.ID_ANY, u"学校：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblSchool.Wrap(-1)
         gbSizer1.Add(self.lblSchool, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_1, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                       0)
+        gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
 
         self.txtSchool = wx.TextCtrl(self.operationPanel, wx.ID_2, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                      0)
@@ -121,14 +125,6 @@ class MainFormBase(wx.Frame):
                                             wx.DefaultSize, 0)
         gbSizer1.Add(self.txtMeasuredAngle, wx.GBPosition(6, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
 
-        self.lblDistrict = wx.StaticText(self.operationPanel, wx.ID_ANY, u"区域：", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.lblDistrict.Wrap(-1)
-        gbSizer1.Add(self.lblDistrict, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
-
-        self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_1, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
-                                       0)
-        gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
-
         self.btnSearch = wx.Button(self.operationPanel, wx.ID_ANY, u"查找", wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer1.Add(self.btnSearch, wx.GBPosition(7, 1), wx.GBSpan(1, 1), wx.ALL, 5)
 
@@ -138,14 +134,95 @@ class MainFormBase(wx.Frame):
         self.btnExport = wx.Button(self.operationPanel, wx.ID_ANY, u"导出当前数据", wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer1.Add(self.btnExport, wx.GBPosition(9, 1), wx.GBSpan(1, 1), wx.ALL, 5)
 
+        self.lblDistrict = wx.StaticText(self.operationPanel, wx.ID_ANY, u"区域：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblDistrict.Wrap(-1)
+        gbSizer1.Add(self.lblDistrict, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
         gbSizer1.AddGrowableCol(1)
 
         self.operationPanel.SetSizer(gbSizer1)
         self.operationPanel.Layout()
         gbSizer1.Fit(self.operationPanel)
-        bSizer1.Add(self.operationPanel, 1, wx.ALL | wx.EXPAND, 0)
+        bSizer1.Add(self.operationPanel, 1, wx.ALIGN_RIGHT | wx.ALL | wx.EXPAND, 0)
 
         self.SetSizer(bSizer1)
+        self.Layout()
+
+        self.Centre(wx.BOTH)
+
+        # Connect Events
+        self.patientDataTable.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.onRowSelect)
+
+    def __del__(self):
+        pass
+
+
+    # Virtual event handlers, overide them in your derived class
+    def onRowSelect(self, event):
+        event.Skip()
+
+
+###########################################################################
+## Class CheckPatientDialogBase
+###########################################################################
+
+class CheckPatientDialogBase(wx.Dialog):
+    def __init__(self, parent):
+        wx.Dialog.__init__(self, parent, id=wx.ID_ANY, title=u"复查病人信息", pos=wx.DefaultPosition, size=wx.Size(304, 273),
+                           style=wx.DEFAULT_DIALOG_STYLE)
+
+        self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
+
+        gbSizer1 = wx.GridBagSizer(0, 0)
+        gbSizer1.SetFlexibleDirection(wx.HORIZONTAL)
+        gbSizer1.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+
+        self.lblPatientID = wx.StaticText(self, wx.ID_ANY, u"编号：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblPatientID.Wrap(-1)
+        gbSizer1.Add(self.lblPatientID, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.lblPatientIDValue = wx.StaticText(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblPatientIDValue.Wrap(-1)
+        gbSizer1.Add(self.lblPatientIDValue, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.ALL, 5)
+
+        self.lblName = wx.StaticText(self, wx.ID_ANY, u"姓名：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblName.Wrap(-1)
+        gbSizer1.Add(self.lblName, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.lblNameValue = wx.StaticText(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblNameValue.Wrap(-1)
+        gbSizer1.Add(self.lblNameValue, wx.GBPosition(1, 1), wx.GBSpan(1, 2), wx.ALL, 5)
+
+        self.txtXRayNum = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.txtXRayNum, wx.GBPosition(2, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
+
+        self.lblXRayNum = wx.StaticText(self, wx.ID_ANY, u"X光片号：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblXRayNum.Wrap(-1)
+        gbSizer1.Add(self.lblXRayNum, wx.GBPosition(2, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.txtCobbSection = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.txtCobbSection, wx.GBPosition(3, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
+
+        self.lblCobbSection = wx.StaticText(self, wx.ID_ANY, u"Cobb角节段：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblCobbSection.Wrap(-1)
+        gbSizer1.Add(self.lblCobbSection, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.lblCobbDegree = wx.StaticText(self, wx.ID_ANY, u"Cobb角度数：", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.lblCobbDegree.Wrap(-1)
+        gbSizer1.Add(self.lblCobbDegree, wx.GBPosition(4, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.txtCobbDegree = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.txtCobbDegree, wx.GBPosition(4, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
+
+        self.btnCheck = wx.Button(self, wx.ID_OK, u"标记为已复查", wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.btnCheck, wx.GBPosition(5, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        self.btnClose = wx.Button(self, wx.ID_CANCEL, u"关闭", wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.btnClose, wx.GBPosition(5, 2), wx.GBSpan(1, 1), wx.ALL, 5)
+
+        gbSizer1.AddGrowableCol(1)
+
+        self.SetSizer(gbSizer1)
         self.Layout()
 
         self.Centre(wx.BOTH)

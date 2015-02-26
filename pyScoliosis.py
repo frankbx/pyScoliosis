@@ -3,6 +3,7 @@
 import wx
 
 import pyScoliosisUI as ui
+import pyScoliosisUtils as utils
 
 
 if "2.8" in wx.version():
@@ -11,7 +12,8 @@ if "2.8" in wx.version():
 else:
     from wx.lib.pubsub import pub
 
-column_labels = [u"编号", u"区域", u"学校", u"班级", u"学号", u"姓名", u"联系方式", u"测量角度", u"已复查", u"分组"]
+column_labels = [u"编号", u"区域", u"学校", u"班级", u"学号", u"姓名", u"联系方式", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查",
+                 u"分组"]
 PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
@@ -20,8 +22,11 @@ STUDENT_NUM = 4
 NAME = 5
 CONTACT_INFO = 6
 MEASURED_ANGLE = 7
-IS_CHECKED = 8
-GROUP = 9
+XRAYNUM = 8
+COBBSECTION = 9
+COBBDEGREE = 10
+IS_CHECKED = 11
+GROUP = 12
 
 
 class LoginDialog():
@@ -43,26 +48,11 @@ class LoginDialog():
         self.Destroy()
 
 
-class Patient(list):
-    def __init__(self, patient_id=None, district=None, name=None, contact_info=None, school=None, class_num=None,
-                 group=None,
-                 measured_angle=None, is_checked=None, student_num=None):
-        self.patient_id = patient_id
-        self.district = district
-        self.name = name
-        self.contact_info = contact_info
-        self.school = school
-        self.class_num = class_num
-        self.group = group
-        self.measured_angle = measured_angle
-        self.is_checked = is_checked
-        self.student_num = student_num
-
-
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        self.data = self.loaddata()
+        # utils.save_data(utils.dummy_data())
+        self.data = utils.load_data()
         table = PatientTable(self.data)
         self.setTable(table)
         self.Layout()
@@ -71,18 +61,36 @@ class MainForm(ui.MainFormBase):
     def setTable(self, table):
         self.table = table
         self.patientDataTable.SetTable(table)
+        self.patientDataTable.SetSelectionMode(wx.grid.Grid.SelectRows)
         self.patientDataTable.AutoSize()
 
-    def loaddata(self):
-        data = []
-        for i in range(0, 6):
-            p = [i + 1, "district", "school", "class", "student number", "name",
-                 "contact information *********************", "measured angle", False,
-                 "A"]
-            print p
-            data.append(p)
+    def onRowSelect(self, event):
+        row = event.GetRow()
+        col = event.GetCol()
+        checkpatientdialog = CheckPatientDialog(None)
+        checkpatientdialog.set_values(self.data[row])
+        print self.data[row][col]
+        if checkpatientdialog.ShowModal() == wx.ID_OK:
+            xrayNum = checkpatientdialog.txtXRayNum.GetValue()
+            cobbSection = checkpatientdialog.txtCobbSection.GetValue()
+            cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
+            # print xrayNum, cobbSection, cobbDegree
+            self.data[row][XRAYNUM] = xrayNum
+            self.data[row][COBBSECTION] = cobbSection
+            self.data[row][COBBDEGREE] = cobbDegree
+            self.data[row][IS_CHECKED] = True
+            # self.patientDataTable.Refresh()
+            self.patientDataTable.AutoSize()
+            utils.save_data(self.data)
+        else:
+            print "canceled"
+        checkpatientdialog.Destroy()
 
-        return data
+
+class CheckPatientDialog(ui.CheckPatientDialogBase):
+    def set_values(self, patient):
+        self.lblPatientIDValue.SetLabelText(unicode(patient[PATIENT_ID]))
+        self.lblNameValue.SetLabelText(unicode(patient[NAME]))
 
 
 class PatientTable(wx.grid.PyGridTableBase):
@@ -90,14 +98,13 @@ class PatientTable(wx.grid.PyGridTableBase):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
         print len(self.data)
-        self.colLabels = [u"编号", u"区域", u"学校", u"班级", u"学号", u"姓名", u"联系方式", u"测量角度"]
-        # print self.colLabels
+        self.colLabels = column_labels
 
     def GetNumberRows(self):
         return len(self.data)
 
     def GetNumberCols(self):
-        return 8
+        return len(self.colLabels)
 
     def IsEmptyCell(self, row, col):
         return False
@@ -122,7 +129,5 @@ class PatientTable(wx.grid.PyGridTableBase):
 if __name__ == '__main__':
     app = wx.App()
     frame = MainForm()
-    # print dir(frame)
-    frame.Layout()
     frame.Show(True)
     app.MainLoop()
