@@ -27,6 +27,7 @@ COBBSECTION = 9
 COBBDEGREE = 10
 IS_CHECKED = 11
 GROUP = 12
+ID = 13
 
 
 class LoginDialog():
@@ -52,17 +53,24 @@ class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
         # utils.save_data(utils.dummy_data())
-        self.data = utils.load_data()
-        table = PatientTable(self.data)
-        self.setTable(table)
-        self.Layout()
+        self.data = utils.load_all_patients()
+        self.isFiltered = False
+
+        self.patientDataTable.SetRowLabelSize(0)
+        # self.patientDataTable.AutoSize()
+        self.setTable(self.data)
+        # self.Layout()
+        # utils.create_database()
+        # utils.init_database()
 
 
-    def setTable(self, table):
-        self.table = table
+    def setTable(self, d):
+        table = PatientTable(d)
         self.patientDataTable.SetTable(table)
         self.patientDataTable.SetSelectionMode(wx.grid.Grid.SelectRows)
         self.patientDataTable.AutoSize()
+        self.patientDataTable.Refresh()
+        self.Layout()
 
     def onRowSelect(self, event):
         row = event.GetRow()
@@ -74,30 +82,52 @@ class MainForm(ui.MainFormBase):
             xrayNum = checkpatientdialog.txtXRayNum.GetValue()
             cobbSection = checkpatientdialog.txtCobbSection.GetValue()
             cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
-            # print xrayNum, cobbSection, cobbDegree
             self.data[row][XRAYNUM] = xrayNum
             self.data[row][COBBSECTION] = cobbSection
             self.data[row][COBBDEGREE] = cobbDegree
             self.data[row][IS_CHECKED] = True
-            # self.patientDataTable.Refresh()
-            self.patientDataTable.AutoSize()
-            utils.save_data(self.data)
+            utils.update_patient_data(self.data[row])
+            self.patientDataTable.Refresh()
         else:
             print "canceled"
         checkpatientdialog.Destroy()
+
+
+    def onShowUncheckedOnly(self, event):
+        if self.cbxFilter.GetValue():
+            self.isFiltered = True
+            print "set filter to true"
+            for each in self.data:
+                if each[IS_CHECKED]:
+                    print str(each[PATIENT_ID]) + " removed"
+                    self.data.remove(each)
+        else:
+            self.isFiltered = False
+            print "set filter to false"
+            self.data = utils.load_all_patients()
+        self.setTable(self.data)
+
+    def onExportClick(self, event):
+        print "export clicked"
+
+    def onSearchClick(self, event):
+        print "search clicked"
 
 
 class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
         self.lblPatientIDValue.SetLabelText(unicode(patient[PATIENT_ID]))
         self.lblNameValue.SetLabelText(unicode(patient[NAME]))
+        self.txtXRayNum.SetValue(patient[XRAYNUM])
+        self.txtCobbSection.SetValue(patient[COBBSECTION])
+        self.txtCobbDegree.SetValue(patient[COBBDEGREE])
 
 
 class PatientTable(wx.grid.PyGridTableBase):
     def __init__(self, data):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
-        print len(self.data)
+        # print len(self.data)
         self.colLabels = column_labels
 
     def GetNumberRows(self):

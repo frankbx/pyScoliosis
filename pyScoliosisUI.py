@@ -65,7 +65,8 @@ class MainFormBase(wx.Frame):
         bSizer1.Add(self.patientDataTable, 1, wx.ALL | wx.EXPAND, 0)
 
         self.operationPanel = wx.Panel(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL)
-        self.operationPanel.SetMaxSize(wx.Size(350, -1))
+        self.operationPanel.SetMinSize(wx.Size(250, -1))
+        self.operationPanel.SetMaxSize(wx.Size(600, -1))
 
         gbSizer1 = wx.GridBagSizer(0, 0)
         gbSizer1.SetFlexibleDirection(wx.HORIZONTAL)
@@ -143,7 +144,7 @@ class MainFormBase(wx.Frame):
         self.operationPanel.SetSizer(gbSizer1)
         self.operationPanel.Layout()
         gbSizer1.Fit(self.operationPanel)
-        bSizer1.Add(self.operationPanel, 1, wx.ALIGN_RIGHT | wx.ALL | wx.EXPAND, 0)
+        bSizer1.Add(self.operationPanel, 0, wx.ALIGN_RIGHT | wx.ALL | wx.EXPAND, 0)
 
         self.SetSizer(bSizer1)
         self.Layout()
@@ -152,6 +153,9 @@ class MainFormBase(wx.Frame):
 
         # Connect Events
         self.patientDataTable.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.onRowSelect)
+        self.btnSearch.Bind(wx.EVT_BUTTON, self.onSearchClick)
+        self.cbxFilter.Bind(wx.EVT_CHECKBOX, self.onShowUncheckedOnly)
+        self.btnExport.Bind(wx.EVT_BUTTON, self.onExportClick)
 
     def __del__(self):
         pass
@@ -161,6 +165,15 @@ class MainFormBase(wx.Frame):
     def onRowSelect(self, event):
         event.Skip()
 
+    def onSearchClick(self, event):
+        event.Skip()
+
+    def onShowUncheckedOnly(self, event):
+        event.Skip()
+
+    def onExportClick(self, event):
+        event.Skip()
+	
 
 ###########################################################################
 ## Class CheckPatientDialogBase
