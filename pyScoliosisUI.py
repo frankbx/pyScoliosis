@@ -78,11 +78,11 @@ class MainFormBase(wx.Frame):
 
         self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_1, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                        0)
-        gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
+        gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.txtSchool = wx.TextCtrl(self.operationPanel, wx.ID_2, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                      0)
-        gbSizer1.Add(self.txtSchool, wx.GBPosition(1, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
+        gbSizer1.Add(self.txtSchool, wx.GBPosition(1, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.lblClass = wx.StaticText(self.operationPanel, wx.ID_ANY, u"班级：", wx.Point(-1, -1), wx.DefaultSize, 0)
         self.lblClass.Wrap(-1)
@@ -90,50 +90,24 @@ class MainFormBase(wx.Frame):
 
         self.txtClass = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                     0)
-        gbSizer1.Add(self.txtClass, wx.GBPosition(2, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
-
-        self.lblStuNum = wx.StaticText(self.operationPanel, wx.ID_ANY, u"学号：", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.lblStuNum.Wrap(-1)
-        gbSizer1.Add(self.lblStuNum, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 5)
-
-        self.txtStuNum = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
-                                     0)
-        gbSizer1.Add(self.txtStuNum, wx.GBPosition(3, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
+        gbSizer1.Add(self.txtClass, wx.GBPosition(2, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.lblName = wx.StaticText(self.operationPanel, wx.ID_ANY, u"姓名：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblName.Wrap(-1)
-        gbSizer1.Add(self.lblName, wx.GBPosition(4, 0), wx.GBSpan(1, 1), wx.ALL, 5)
+        gbSizer1.Add(self.lblName, wx.GBPosition(3, 0), wx.GBSpan(1, 1), wx.ALL, 5)
 
         self.txtName = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                    0)
-        gbSizer1.Add(self.txtName, wx.GBPosition(4, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
-
-        self.lblContactInfo = wx.StaticText(self.operationPanel, wx.ID_ANY, u"联系方式：", wx.DefaultPosition,
-                                            wx.DefaultSize, 0)
-        self.lblContactInfo.Wrap(-1)
-        gbSizer1.Add(self.lblContactInfo, wx.GBPosition(5, 0), wx.GBSpan(1, 1), wx.ALL, 5)
-
-        self.txtContactInfo = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                          wx.DefaultSize, 0)
-        gbSizer1.Add(self.txtContactInfo, wx.GBPosition(5, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
-
-        self.lblMeasuredAngle = wx.StaticText(self.operationPanel, wx.ID_ANY, u"测量角度：", wx.DefaultPosition,
-                                              wx.DefaultSize, 0)
-        self.lblMeasuredAngle.Wrap(-1)
-        gbSizer1.Add(self.lblMeasuredAngle, wx.GBPosition(6, 0), wx.GBSpan(1, 1), wx.ALL, 5)
-
-        self.txtMeasuredAngle = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                            wx.DefaultSize, 0)
-        gbSizer1.Add(self.txtMeasuredAngle, wx.GBPosition(6, 1), wx.GBSpan(1, 1), wx.ALL | wx.EXPAND, 5)
+        gbSizer1.Add(self.txtName, wx.GBPosition(3, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.btnSearch = wx.Button(self.operationPanel, wx.ID_ANY, u"查找", wx.DefaultPosition, wx.DefaultSize, 0)
-        gbSizer1.Add(self.btnSearch, wx.GBPosition(7, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+        gbSizer1.Add(self.btnSearch, wx.GBPosition(4, 1), wx.GBSpan(1, 1), wx.ALL, 5)
 
         self.cbxFilter = wx.CheckBox(self.operationPanel, wx.ID_ANY, u"只显示未检查病人", wx.DefaultPosition, wx.DefaultSize, 0)
-        gbSizer1.Add(self.cbxFilter, wx.GBPosition(8, 0), wx.GBSpan(1, 2), wx.ALL, 5)
+        gbSizer1.Add(self.cbxFilter, wx.GBPosition(5, 0), wx.GBSpan(1, 3), wx.ALL, 5)
 
         self.btnExport = wx.Button(self.operationPanel, wx.ID_ANY, u"导出当前数据", wx.DefaultPosition, wx.DefaultSize, 0)
-        gbSizer1.Add(self.btnExport, wx.GBPosition(9, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+        gbSizer1.Add(self.btnExport, wx.GBPosition(4, 2), wx.GBSpan(1, 1), wx.ALL, 5)
 
         self.lblDistrict = wx.StaticText(self.operationPanel, wx.ID_ANY, u"区域：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblDistrict.Wrap(-1)
@@ -194,17 +168,16 @@ class CheckPatientDialogBase(wx.Dialog):
         self.lblPatientID.Wrap(-1)
         gbSizer1.Add(self.lblPatientID, wx.GBPosition(0, 0), wx.GBSpan(1, 1), wx.ALL, 5)
 
-        self.lblPatientIDValue = wx.StaticText(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
-        self.lblPatientIDValue.Wrap(-1)
-        gbSizer1.Add(self.lblPatientIDValue, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.ALL, 5)
+        self.txtPatientID = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                        wx.TE_READONLY)
+        gbSizer1.Add(self.txtPatientID, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.lblName = wx.StaticText(self, wx.ID_ANY, u"姓名：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblName.Wrap(-1)
         gbSizer1.Add(self.lblName, wx.GBPosition(1, 0), wx.GBSpan(1, 1), wx.ALL, 5)
 
-        self.lblNameValue = wx.StaticText(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
-        self.lblNameValue.Wrap(-1)
-        gbSizer1.Add(self.lblNameValue, wx.GBPosition(1, 1), wx.GBSpan(1, 2), wx.ALL, 5)
+        self.txtName = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
+        gbSizer1.Add(self.txtName, wx.GBPosition(1, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.txtXRayNum = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer1.Add(self.txtXRayNum, wx.GBPosition(2, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)

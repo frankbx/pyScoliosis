@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
-import pickle
-
 import sqlite3
+
+from xlwt import Workbook
 
 PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
 CLASS = 3
-STUDENT_NUM = 4
-NAME = 5
+GENDER = 5
+NAME = 4
 CONTACT_INFO = 6
 MEASURED_ANGLE = 7
 XRAYNUM = 8
 COBBSECTION = 9
 COBBDEGREE = 10
 IS_CHECKED = 11
-GROUP = 12
-ID = 13
+ID = 12
+
+column_labels = [u"编号", u"区域", u"学校", u"班级", u"性别", u"姓名", u"联系方式", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
 
 CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
                           [patient_id] nvARCHAR(20)  UNIQUE NOT NULL,
@@ -32,13 +33,13 @@ CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
                           [cobbsection] NVARCHAR(10)  NULL,
                           [cobbdegree] NVARCHAR(10)  NULL,
                           [is_checked] BOOLEAN  NULL,
-                          [group] nvARCHAR(10)  NULL,
+                          [gender] NVARCHAR(1) NULL,
                           [id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT)"""
 
-INSERT_INTO_PATIENT = """ INSERT INTO patients (patient_id, district, school,class, student_num, [name], contact_info,measured_angle,xraynum, cobbsection, cobbdegree, is_checked,[group])
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) """
+INSERT_INTO_PATIENT = """ INSERT INTO patients (patient_id, district, school,class, gender, [name], contact_info,measured_angle,xraynum, cobbsection, cobbdegree, is_checked)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?) """
 
-SELECT_ALL_PATIENT = """SELECT patient_id, district, school,class, student_num, [name], contact_info,measured_angle,xraynum, cobbsection, cobbdegree, is_checked,[group], id FROM patients"""
+SELECT_ALL_PATIENT = """SELECT patient_id, district, school,class, gender, [name], contact_info,measured_angle,xraynum, cobbsection, cobbdegree, is_checked, id FROM patients """
 
 CHECK_PATIENT = """ UPDATE patients SET xraynum = ?, cobbsection =? , cobbdegree =?, is_checked = 1 WHERE id = ?"""
 DB_NAME = "data.dat"
@@ -58,10 +59,10 @@ def init_database():
     dummy = dummy_data()
     for i in dummy:
         cursor.execute(INSERT_INTO_PATIENT, (
-            i[PATIENT_ID], i[DISTRICT], i[SCHOOL], i[CLASS], i[STUDENT_NUM], i[NAME], i[CONTACT_INFO],
+            i[PATIENT_ID], i[DISTRICT], i[SCHOOL], i[CLASS], i[GENDER], i[NAME], i[CONTACT_INFO],
             i[MEASURED_ANGLE],
-            i[XRAYNUM], i[COBBSECTION], i[COBBDEGREE], i[IS_CHECKED], i[GROUP]))
-        conn.commit()
+            i[XRAYNUM], i[COBBSECTION], i[COBBDEGREE], i[IS_CHECKED]))
+    conn.commit()
     conn.close()
 
 
@@ -85,24 +86,43 @@ def update_patient_data(patient):
     conn.close()
 
 
-def save_data(data, filename="data.pickle"):
-    try:
-        with open(filename, 'wb') as savedata:
-            pickle.dump(data, savedata)
-        print "data saved!"
-    except IOError as ierr:
-        print("File Error: " + str(ierr))
-    except pickle.PickleError as perr:
-        print("Pickle Error: " + str(perr))
+def execute_query(conditions):
+    sql = SELECT_ALL_PATIENT
+    where = " WHERE "
+    for each in conditions.keys():
+        where = unicode(where + " " + each + " = " + '"' + conditions[each] + '" AND')
+    print where[:-3]
+    sql = unicode(sql + where[:-3])
+    print sql
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    conn.close()
+    return [list(i) for i in data]
 
 
 def dummy_data():
     data = []
     for i in range(0, 600):
         it = str(i + 1)
-        p = [i + 1, "district " + it, "school " + it, "class " + it, "student number " + it, u"姓名 " + it,
-             "contact information ********************* " + it, "measured angle " + it, "", "", "", False,
-             "A"]
+        p = [i + 1, "district " + it, "school " + it, "class " + it, u"姓名 " + it, u"男",
+             "contact information ********************* " + it, "measured angle " + it, "", "", "", False]
         # print p
         data.append(p)
     return data
+
+
+def export_to_excel(filename, data):
+    print filename
+    print len(data)
+    book = Workbook()
+    sheet = book.add_sheet(u"病人信息")
+    for i in range(0, len(column_labels)):
+        sheet.row(0).write(i, column_labels[i])
+
+    for x in range(0, len(data)):
+        for y in range(0, len(column_labels)):
+            sheet.row(x + 1).write(y, data[x][y])
+
+    book.save(filename)

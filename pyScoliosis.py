@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
+import os
+
 import wx
 
 import pyScoliosisUI as ui
@@ -12,22 +14,20 @@ if "2.8" in wx.version():
 else:
     from wx.lib.pubsub import pub
 
-column_labels = [u"编号", u"区域", u"学校", u"班级", u"学号", u"姓名", u"联系方式", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查",
-                 u"分组"]
+column_labels = [u"编号", u"区域", u"学校", u"班级", u"性别", u"姓名", u"联系方式", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
 PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
 CLASS = 3
-STUDENT_NUM = 4
-NAME = 5
+GENDER = 5
+NAME = 4
 CONTACT_INFO = 6
 MEASURED_ANGLE = 7
 XRAYNUM = 8
 COBBSECTION = 9
 COBBDEGREE = 10
 IS_CHECKED = 11
-GROUP = 12
-ID = 13
+ID = 12
 
 
 class LoginDialog():
@@ -53,6 +53,8 @@ class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
         # utils.save_data(utils.dummy_data())
+        # utils.create_database()
+        # utils.init_database()
         self.data = utils.load_all_patients()
         self.isFiltered = False
 
@@ -60,8 +62,6 @@ class MainForm(ui.MainFormBase):
         # self.patientDataTable.AutoSize()
         self.setTable(self.data)
         # self.Layout()
-        # utils.create_database()
-        # utils.init_database()
 
 
     def setTable(self, d):
@@ -96,28 +96,58 @@ class MainForm(ui.MainFormBase):
     def onShowUncheckedOnly(self, event):
         if self.cbxFilter.GetValue():
             self.isFiltered = True
-            print "set filter to true"
+            # print "set filter to true"
             for each in self.data:
                 if each[IS_CHECKED]:
                     print str(each[PATIENT_ID]) + " removed"
                     self.data.remove(each)
         else:
             self.isFiltered = False
-            print "set filter to false"
+            # print "set filter to false"
             self.data = utils.load_all_patients()
         self.setTable(self.data)
 
+    def filter_table(self, filter):
+        self.data = utils.execute_query(filter)
+        self.setTable(self.data)
+
     def onExportClick(self, event):
-        print "export clicked"
+        wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
+        filename = None
+        dlg = wx.FileDialog(self, u"导出到...",
+                            os.getcwd(),
+                            style=wx.SAVE | wx.OVERWRITE_PROMPT,
+                            wildcard=wildcard)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetPath()
+            if not os.path.splitext(filename)[1]:
+                filename = filename + '.xls'
+        if filename:
+            utils.export_to_excel(filename, self.data)
 
     def onSearchClick(self, event):
-        print "search clicked"
+        formdata = {}
+        if self.txtDistrict.GetValue().strip():
+            print "district: " + self.txtDistrict.GetValue()
+            formdata["[district]"] = self.txtDistrict.GetValue()
+        if self.txtSchool.GetValue().strip():
+            print "school: " + self.txtSchool.GetValue().strip()
+            formdata["[school]"] = self.txtSchool.GetValue().strip()
+        if self.txtClass.GetValue().strip():
+            print "class: " + self.txtClass.GetValue().strip()
+            formdata["[class]"] = self.txtClass.GetValue().strip()
+        if self.txtName.GetValue().strip():
+            print "Name: " + self.txtName.GetValue().strip()
+            formdata["[name]"] = self.txtName.GetValue().strip()
+        print formdata
+        if not len(formdata) == 0:
+            self.filter_table(formdata)
 
 
 class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
-        self.lblPatientIDValue.SetLabelText(unicode(patient[PATIENT_ID]))
-        self.lblNameValue.SetLabelText(unicode(patient[NAME]))
+        self.txtPatientID.SetValue(unicode(patient[PATIENT_ID]))
+        self.txtName.SetValue(unicode(patient[NAME]))
         self.txtXRayNum.SetValue(patient[XRAYNUM])
         self.txtCobbSection.SetValue(patient[COBBSECTION])
         self.txtCobbDegree.SetValue(patient[COBBDEGREE])
