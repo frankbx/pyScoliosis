@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
 import os
+import sys
 
 import wx
 
 import pyScoliosisUI as ui
 import pyScoliosisUtils as utils
+from pyScoliosisUtils import column_labels
 
 
 if "2.8" in wx.version():
@@ -14,20 +16,27 @@ if "2.8" in wx.version():
 else:
     from wx.lib.pubsub import pub
 
-column_labels = [u"编号", u"区域", u"学校", u"班级", u"性别", u"姓名", u"联系方式", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
 PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
 CLASS = 3
-GENDER = 5
 NAME = 4
-CONTACT_INFO = 6
-MEASURED_ANGLE = 7
-XRAYNUM = 8
-COBBSECTION = 9
-COBBDEGREE = 10
-IS_CHECKED = 11
-ID = 12
+GENDER = 5
+DOB = 6
+CONTACT_INFO = 7
+HEIGHT = 8
+WEIGHT = 9
+FAT = 10
+FAT_PERCENTAGE = 11
+BMI = 12
+FAT_TYPE = 13
+BASIC_METABOLISM = 14
+MEASURED_ANGLE = 15
+XRAYNUM = 16
+COBBSECTION = 17
+COBBDEGREE = 18
+IS_CHECKED = 19
+ID = 20
 
 
 class LoginDialog():
@@ -52,16 +61,20 @@ class LoginDialog():
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        # utils.save_data(utils.dummy_data())
-        # utils.create_database()
-        # utils.init_database()
+        if os.path.exists(utils.DB_NAME):
+            print "DB file found!"
+        else:
+            dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
+            if dlg.ShowModal() == wx.ID_YES:
+                utils.create_database()
+            else:
+                sys.exit(-1)
+            dlg.Destroy()
         self.data = utils.load_all_patients()
         self.isFiltered = False
 
         self.patientDataTable.SetRowLabelSize(0)
-        # self.patientDataTable.AutoSize()
         self.setTable(self.data)
-        # self.Layout()
 
 
     def setTable(self, d):
@@ -85,7 +98,7 @@ class MainForm(ui.MainFormBase):
             self.data[row][XRAYNUM] = xrayNum
             self.data[row][COBBSECTION] = cobbSection
             self.data[row][COBBDEGREE] = cobbDegree
-            self.data[row][IS_CHECKED] = True
+            self.data[row][IS_CHECKED] = 1
             utils.update_patient_data(self.data[row])
             self.patientDataTable.Refresh()
         else:
@@ -96,19 +109,17 @@ class MainForm(ui.MainFormBase):
     def onShowUncheckedOnly(self, event):
         if self.cbxFilter.GetValue():
             self.isFiltered = True
-            # print "set filter to true"
             for each in self.data:
                 if each[IS_CHECKED]:
-                    print str(each[PATIENT_ID]) + " removed"
+                    # print str(each[PATIENT_ID]) + " removed"
                     self.data.remove(each)
         else:
             self.isFiltered = False
-            # print "set filter to false"
             self.data = utils.load_all_patients()
         self.setTable(self.data)
 
-    def filter_table(self, filter):
-        self.data = utils.execute_query(filter)
+    def filter_table(self, filter_str):
+        self.data = utils.execute_query(filter_str)
         self.setTable(self.data)
 
     def onExportClick(self, event):
@@ -121,36 +132,46 @@ class MainForm(ui.MainFormBase):
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             if not os.path.splitext(filename)[1]:
-                filename = filename + '.xls'
+                filename += '.xls'
         if filename:
             utils.export_to_excel(filename, self.data)
 
     def onSearchClick(self, event):
         formdata = {}
         if self.txtDistrict.GetValue().strip():
-            print "district: " + self.txtDistrict.GetValue()
+            # print "district: " + self.txtDistrict.GetValue()
             formdata["[district]"] = self.txtDistrict.GetValue()
         if self.txtSchool.GetValue().strip():
-            print "school: " + self.txtSchool.GetValue().strip()
+            # print "school: " + self.txtSchool.GetValue().strip()
             formdata["[school]"] = self.txtSchool.GetValue().strip()
         if self.txtClass.GetValue().strip():
-            print "class: " + self.txtClass.GetValue().strip()
+            # print "class: " + self.txtClass.GetValue().strip()
             formdata["[class]"] = self.txtClass.GetValue().strip()
         if self.txtName.GetValue().strip():
-            print "Name: " + self.txtName.GetValue().strip()
+            # print "Name: " + self.txtName.GetValue().strip()
             formdata["[name]"] = self.txtName.GetValue().strip()
-        print formdata
+        # print formdata
         if not len(formdata) == 0:
             self.filter_table(formdata)
+
+    def import_data(self, event):
+        wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
+        dlg = wx.FileDialog(self, u"从文件导入数据",
+                            os.getcwd(),
+                            style=wx.OPEN | wx.CHANGE_DIR,
+                            wildcard=wildcard)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetPath()
+            utils.import_from_excel(filename)
 
 
 class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
         self.txtPatientID.SetValue(unicode(patient[PATIENT_ID]))
         self.txtName.SetValue(unicode(patient[NAME]))
-        self.txtXRayNum.SetValue(patient[XRAYNUM])
-        self.txtCobbSection.SetValue(patient[COBBSECTION])
-        self.txtCobbDegree.SetValue(patient[COBBDEGREE])
+        self.txtXRayNum.SetValue(unicode(patient[XRAYNUM]))
+        self.txtCobbSection.SetValue(unicode(patient[COBBSECTION]))
+        self.txtCobbDegree.SetValue(unicode(patient[COBBDEGREE]))
 
 
 class PatientTable(wx.grid.PyGridTableBase):
