@@ -60,7 +60,7 @@ class MainFormBase(wx.Frame):
 
         # Cell Defaults
         self.patientDataTable.SetDefaultCellFont(
-            wx.Font(wx.NORMAL_FONT.GetPointSize(), 70, 93, 90, False, wx.EmptyString))
+            wx.Font(wx.NORMAL_FONT.GetPointSize(), 75, 90, 90, False, wx.EmptyString))
         self.patientDataTable.SetDefaultCellAlignment(wx.ALIGN_LEFT, wx.ALIGN_TOP)
         bSizer1.Add(self.patientDataTable, 1, wx.ALL | wx.EXPAND, 0)
 
@@ -109,10 +109,8 @@ class MainFormBase(wx.Frame):
         self.cbxFilter = wx.CheckBox(self.operationPanel, wx.ID_ANY, u"只显示未检查病人", wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer1.Add(self.cbxFilter, wx.GBPosition(5, 0), wx.GBSpan(1, 3), wx.ALL, 5)
 
-        self.m_button5 = wx.Button(self.operationPanel, wx.ID_ANY, u"导入数据", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.m_button5.Hide()
-
-        gbSizer1.Add(self.m_button5, wx.GBPosition(6, 0), wx.GBSpan(1, 2), wx.ALL, 5)
+        self.btnImport = wx.Button(self.operationPanel, wx.ID_ANY, u"导入数据", wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.btnImport, wx.GBPosition(6, 0), wx.GBSpan(1, 2), wx.ALL, 5)
 
         self.lblDistrict = wx.StaticText(self.operationPanel, wx.ID_ANY, u"区域：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblDistrict.Wrap(-1)
@@ -135,7 +133,7 @@ class MainFormBase(wx.Frame):
         self.btnSearch.Bind(wx.EVT_BUTTON, self.onSearchClick)
         self.btnExport.Bind(wx.EVT_BUTTON, self.onExportClick)
         self.cbxFilter.Bind(wx.EVT_CHECKBOX, self.onShowUncheckedOnly)
-        self.m_button5.Bind(wx.EVT_BUTTON, self.import_data)
+        self.btnImport.Bind(wx.EVT_BUTTON, self.import_data)
 
     def __del__(self):
         pass

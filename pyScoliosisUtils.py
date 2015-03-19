@@ -3,47 +3,48 @@
 import sqlite3
 
 from xlwt import Workbook
-from xlrd import open_workbook
+from xlrd import *
 
 PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
 CLASS = 3
-NAME = 4
-GENDER = 5
-DOB = 6
-CONTACT_INFO = 7
-HEIGHT = 8
-WEIGHT = 9
-FAT = 10
-FAT_PERCENTAGE = 11
-BMI = 12
-FAT_TYPE = 13
-BASIC_METABOLISM = 14
-MEASURED_ANGLE = 15
-XRAYNUM = 16
-COBBSECTION = 17
-COBBDEGREE = 18
-IS_CHECKED = 19
-ID = 20
+GRADE = 4
+NAME = 5
+GENDER = 6
+DOB = 7
+CONTACT_INFO = 8
+HEIGHT = 9
+WEIGHT = 10
+FAT = 11
+FAT_PERCENTAGE = 12
+BMI = 13
+FAT_TYPE = 14
+BASIC_METABOLISM = 15
+MEASURED_ANGLE = 16
+XRAYNUM = 17
+COBBSECTION = 18
+COBBDEGREE = 19
+IS_CHECKED = 20
+ID = 21
 
 column_labels = [u"编号", u"区域", u"学校", u"年级", u"班级", u"姓名", u"性别", u"生日", u"联系方式", u"身高", u"体重", u"脂肪判断", u"脂肪含量",
                  u"BMI指数",
                  u"肥胖类型", u"基础代谢", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
 
-column_nums = [1, 0, 10, 11, 12, 2, 7, 9, 3, 82, 83, 80, 81]
+column_nums = [1, 0, 10, 11, 12, 2, 7, 9, 3, 82, 83, 6, 80, 81]
 
 CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
-                          [patient_id] NVARCHAR(20)  UNIQUE NOT NULL,
+                          [patient_id] INTEGER  UNIQUE NOT NULL,
                           [district] NVARCHAR(10)  NULL,
                           [school] NVARCHAR(20)  NULL,
-                          [grade] NVARCHAR(10)  NULL,
-                          [class_name] NVARCHAR(10)  NULL,
+                          [grade] INTEGER  NULL,
+                          [class_name] INTEGER  NULL,
                           [name] NVARCHAR(10)  NOT NULL,
                           [gender] NVARCHAR(1) NULL ,
-                          [dob] DATE NULL ,
-                          [contact_info] TEXT  NULL,
-                          [height] INTEGER NULL ,
+                          [dob] INTEGER NULL ,
+                          [contact_info] INTEGER  NULL,
+                          [height] FLOAT NULL ,
                           [weight] FLOAT NULL,
                           [fat] NVARCHAR(10) NULL,
                           [fat_percentage] FLOAT NULL,
@@ -51,22 +52,22 @@ CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
                           [fat_type] NVARCHAR(10) NULL,
                           [basic_metabolism] FLOAT NULL,
                           [measured_angle] NVARCHAR(10)  NULL,
-                          [xraynum] NVARCHAR(10)  NULL,
+                          [xraynum] INTEGER  NULL,
                           [cobbsection] NVARCHAR(10)  NULL,
-                          [cobbdegree] NVARCHAR(10)  NULL,
+                          [cobbdegree] INTEGER  NULL,
                           [is_checked] BOOLEAN  NULL,
                           [id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT)"""
 
-INSERT_INTO_PATIENT = """ INSERT INTO [patients] (patient_id, district, school, grade, class_name, [name], gender, dob, contact_info, height, weight, cobbsection, cobbdegree)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) """
+INSERT_INTO_PATIENT = """ INSERT INTO [patients] (patient_id, district, school, grade, class_name, [name], gender, dob, contact_info, height, weight,xraynum, cobbsection, cobbdegree)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) """
 
-INSERT_INTO_PATIENTS = """ INSERT INTO [patients] (patient_id, district, school,grade,class_name,  [name], gender,dob, contact_info,height,weight,cobbsection, cobbdegree)
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
+INSERT_INTO_PATIENTS = """ INSERT INTO [patients] (patient_id, district, school,grade,class_name,  [name], gender,dob, contact_info,height,weight,xraynum, cobbsection, cobbdegree)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
 
 SELECT_ALL_PATIENT = """SELECT patient_id, district, school,grade, class_name,[name],gender,dob, contact_info, height, weight, fat,fat_percentage, bmi, fat_type,basic_metabolism, measured_angle,xraynum, cobbsection, cobbdegree, is_checked, id FROM patients """
 
 CHECK_PATIENT = """ UPDATE patients SET xraynum = ?, cobbsection =? , cobbdegree =?, is_checked = 1 WHERE id = ?"""
-DB_NAME = "data.dat"
+DB_NAME = "data.db"
 
 
 def create_database():
@@ -158,18 +159,20 @@ def export_to_excel(filename, data):
 
 
 def import_from_excel(filename):
+    # print filename
     book = open_workbook(filename)
     sheet = book.sheet_by_index(0)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    # for i in range(5:sheet.nrows):
-    # cursor.execute(INSERT_INTO_PATIENT, get_value_tuple(sheet, i))
-    sql = INSERT_INTO_PATIENTS % get_value_tuple(sheet, 3)
-    print sql
-    cursor.execute(sql)
+    print sheet.nrows
+    for i in range(3, sheet.nrows):
+        cursor.execute(INSERT_INTO_PATIENT, get_value_tuple(sheet, i))
+        # sql = INSERT_INTO_PATIENTS % get_value_tuple(sheet, i)
+        # print sql
+    # cursor.execute(sql)
     # cursor.execute(INSERT_INTO_PATIENT, (
     # s(sheet, 5, 0), s(sheet, 5, 1), s(sheet, 5, 2), s(sheet, 5, 3), s(sheet, 5, 4), s(sheet, 5, 5), s(sheet, 5, 6),
-    #     s(sheet, 5, 7), s(sheet, 5, 8), s(sheet, 5, 9), s(sheet, 5, 10), s(sheet, 5, 11), s(sheet, 5, 12)))
+    # s(sheet, 5, 7), s(sheet, 5, 8), s(sheet, 5, 9), s(sheet, 5, 10), s(sheet, 5, 11), s(sheet, 5, 12)))
     conn.commit()
     conn.close()
     # for i in range(sheet.nrows):
@@ -188,5 +191,23 @@ def s(sheet, row, i):
 def get_value_tuple(sheet, row):
     l = []
     for x in column_nums:
-        l.append(sheet.cell(row, x).value)
+        if x == 7:
+            l.append(get_gender(int(sheet.cell(row, x).value)))
+        else:
+            # print type(sheet.cell(row, x).value), get_cell_type_text(sheet.cell(row, x).ctype)
+            l.append(unicode(sheet.cell(row, x).value))
     return tuple(l)
+
+
+def get_cell_type_text(type):
+    if type == XL_CELL_TEXT:
+        return "XL_CELL_TEXT"
+    if type == XL_CELL_BOOLEAN:
+        return "XL_CELL_BOOLEAN"
+    if type == XL_CELL_DATE:
+        return "XL_CELL_DATE"
+    if type == XL_CELL_NUMBER:
+        return "XL_CELL_NUMBER"
+    if type == XL_CELL_ERROR:
+        return "XL_CELL_ERROR"
+    return type

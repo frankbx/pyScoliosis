@@ -20,23 +20,24 @@ PATIENT_ID = 0
 DISTRICT = 1
 SCHOOL = 2
 CLASS = 3
-NAME = 4
-GENDER = 5
-DOB = 6
-CONTACT_INFO = 7
-HEIGHT = 8
-WEIGHT = 9
-FAT = 10
-FAT_PERCENTAGE = 11
-BMI = 12
-FAT_TYPE = 13
-BASIC_METABOLISM = 14
-MEASURED_ANGLE = 15
-XRAYNUM = 16
-COBBSECTION = 17
-COBBDEGREE = 18
-IS_CHECKED = 19
-ID = 20
+GRADE = 4
+NAME = 5
+GENDER = 6
+DOB = 7
+CONTACT_INFO = 8
+HEIGHT = 9
+WEIGHT = 10
+FAT = 11
+FAT_PERCENTAGE = 12
+BMI = 13
+FAT_TYPE = 14
+BASIC_METABOLISM = 15
+MEASURED_ANGLE = 16
+XRAYNUM = 17
+COBBSECTION = 18
+COBBDEGREE = 19
+IS_CHECKED = 20
+ID = 21
 
 
 class LoginDialog():
@@ -158,11 +159,13 @@ class MainForm(ui.MainFormBase):
         wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
         dlg = wx.FileDialog(self, u"从文件导入数据",
                             os.getcwd(),
-                            style=wx.OPEN | wx.CHANGE_DIR,
+                            style=wx.OPEN,
                             wildcard=wildcard)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             utils.import_from_excel(filename)
+        self.data = utils.load_all_patients()
+        self.setTable(self.data)
 
 
 class CheckPatientDialog(ui.CheckPatientDialogBase):
