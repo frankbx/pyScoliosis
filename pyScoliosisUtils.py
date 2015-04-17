@@ -16,26 +16,27 @@ DOB = 7
 CONTACT_INFO = 8
 HEIGHT = 9
 WEIGHT = 10
-FAT = 11
-FAT_PERCENTAGE = 12
-BMI = 13
-FAT_TYPE = 14
-BASIC_METABOLISM = 15
-MEASURED_ANGLE = 16
+MEASURED_ANGLE = 11
+FAT = 12
+FAT_PERCENTAGE = 13
+BMI = 14
+FAT_TYPE = 15
+BASIC_METABOLISM = 16
 XRAYNUM = 17
 COBBSECTION = 18
 COBBDEGREE = 19
 IS_CHECKED = 20
 ID = 21
 
-column_labels = [u"编号", u"区域", u"学校", u"年级", u"班级", u"姓名", u"性别", u"生日", u"联系方式", u"身高", u"体重", u"脂肪判断", u"脂肪含量",
+column_labels = [u"编号", u"区域", u"学校", u"年级", u"班级", u"姓名", u"性别", u"生日", u"家长手机", u"身高", u"体重", u"测量角度", u"脂肪判断",
+                 u"脂肪含量",
                  u"BMI指数",
-                 u"肥胖类型", u"基础代谢", u"测量角度", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
+                 u"肥胖类型", u"基础代谢", u"X光片号", u"Cobb角节段", u"Cobb角度数", u"已复查"]
 
 column_nums = [1, 0, 10, 11, 12, 2, 7, 9, 3, 82, 83, 6, 80, 81]
 
 CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
-                          [patient_id] INTEGER  UNIQUE NOT NULL,
+                          [patient_id] INTEGER,
                           [district] NVARCHAR(10)  NULL,
                           [school] NVARCHAR(20)  NULL,
                           [grade] INTEGER  NULL,
@@ -50,7 +51,7 @@ CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
                           [fat_percentage] FLOAT NULL,
                           [bmi] FLOAT NULL ,
                           [fat_type] NVARCHAR(10) NULL,
-                          [basic_metabolism] FLOAT NULL,
+                          [basic_metabolism] INTEGER NULL,
                           [measured_angle] NVARCHAR(10)  NULL,
                           [xraynum] INTEGER  NULL,
                           [cobbsection] NVARCHAR(10)  NULL,
@@ -58,13 +59,13 @@ CREATE_PATIENT_TABLE = """CREATE TABLE IF NOT EXISTS [patients] (
                           [is_checked] BOOLEAN  NULL,
                           [id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT)"""
 
-INSERT_INTO_PATIENT = """ INSERT INTO [patients] (patient_id, district, school, grade, class_name, [name], gender, dob, contact_info, height, weight,xraynum, cobbsection, cobbdegree)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) """
+INSERT_INTO_PATIENT = """INSERT INTO [patients] (patient_id, district, school,grade,class_name,  [name], gender,dob, contact_info,height,weight,measured_angle, fat,fat_percentage, bmi, fat_type,basic_metabolism)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) """
 
-INSERT_INTO_PATIENTS = """ INSERT INTO [patients] (patient_id, district, school,grade,class_name,  [name], gender,dob, contact_info,height,weight,xraynum, cobbsection, cobbdegree)
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
+INSERT_INTO_PATIENTS = """ INSERT INTO [patients] (patient_id, district, school,grade,class_name,  [name], gender,dob, contact_info,height,weight,measured_angle, fat,fat_percentage, bmi, fat_type,basic_metabolism)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
 
-SELECT_ALL_PATIENT = """SELECT patient_id, district, school,grade, class_name,[name],gender,dob, contact_info, height, weight, fat,fat_percentage, bmi, fat_type,basic_metabolism, measured_angle,xraynum, cobbsection, cobbdegree, is_checked, id FROM patients """
+SELECT_ALL_PATIENT = """SELECT patient_id, district, school,grade, class_name,[name],gender,dob, contact_info, height, weight,measured_angle, fat,fat_percentage, bmi, fat_type,basic_metabolism, xraynum, cobbsection, cobbdegree, is_checked, id FROM patients """
 
 CHECK_PATIENT = """ UPDATE patients SET xraynum = ?, cobbsection =? , cobbdegree =?, is_checked = 1 WHERE id = ?"""
 DB_NAME = "data.db"
@@ -78,31 +79,11 @@ def create_database():
     conn.close()
 
 
-def init_database():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    dummy = dummy_data()
-    for i in dummy:
-        cursor.execute(INSERT_INTO_PATIENT, (
-            i[PATIENT_ID], i[DISTRICT], i[SCHOOL], i[CLASS], i[NAME], i[GENDER], i[CONTACT_INFO],
-            i[MEASURED_ANGLE],
-            i[XRAYNUM], i[COBBSECTION], i[COBBDEGREE], i[IS_CHECKED]))
-    conn.commit()
-    conn.close()
-
-
 def load_all_patients():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(SELECT_ALL_PATIENT)
-    data = []
-    # cursor.row_factory = sqlite3.Row
-    # for row in cursor:
-    # for key in Patient.__dict__:
-    # pass
     data = cursor.fetchall()
-    # print type(data)
-    # print type((data)[0])
     conn.close()
     return [list(i) for i in data]
 
@@ -119,10 +100,10 @@ def update_patient_data(patient):
 def execute_query(conditions):
     sql = SELECT_ALL_PATIENT
     where = " WHERE "
-    for each in conditions.keys():
-        where = unicode(where + " " + each + " = " + '"' + conditions[each] + '" AND')
+    # for each in conditions.keys():
+    where = unicode(where + " name " + ' LIKE "%' + conditions["[name]"] + '%"')
     # print where[:-3]
-    sql = unicode(sql + where[:-3])
+    sql = unicode(sql + where)
     # print sql
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -130,17 +111,6 @@ def execute_query(conditions):
     data = cursor.fetchall()
     conn.close()
     return [list(i) for i in data]
-
-
-def dummy_data():
-    data = []
-    for i in range(0, 600):
-        it = str(i + 1)
-        p = [i + 1, "district " + it, "school " + it, "class " + it, u"姓名 " + it, u"男",
-             "contact information ********************* " + it, "measured angle " + it, "", "", "", False]
-        # print p
-        data.append(p)
-    return data
 
 
 def export_to_excel(filename, data):
@@ -164,19 +134,12 @@ def import_from_excel(filename):
     sheet = book.sheet_by_index(0)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    print sheet.nrows
-    for i in range(3, sheet.nrows):
-        cursor.execute(INSERT_INTO_PATIENT, get_value_tuple(sheet, i))
-        # sql = INSERT_INTO_PATIENTS % get_value_tuple(sheet, i)
-        # print sql
-    # cursor.execute(sql)
-    # cursor.execute(INSERT_INTO_PATIENT, (
-    # s(sheet, 5, 0), s(sheet, 5, 1), s(sheet, 5, 2), s(sheet, 5, 3), s(sheet, 5, 4), s(sheet, 5, 5), s(sheet, 5, 6),
-    # s(sheet, 5, 7), s(sheet, 5, 8), s(sheet, 5, 9), s(sheet, 5, 10), s(sheet, 5, 11), s(sheet, 5, 12)))
+    # print sheet.nrows
+    for i in range(1, sheet.nrows):
+        cursor.execute(INSERT_INTO_PATIENT, read_value(sheet, i))
     conn.commit()
     conn.close()
-    # for i in range(sheet.nrows):
-    # print INSERT_INTO_PATIENTS % get_value_tuple(sheet, i)
+    read_value(sheet, 1)
 
 
 def get_gender(i):
@@ -184,30 +147,46 @@ def get_gender(i):
     return gender[i - 1]
 
 
-def s(sheet, row, i):
-    return sheet.cell(row, column_nums[i]).value
+def get_fat(i):
+    fatness = [u'低', u'标准', u'偏高', u'高']
+    return fatness[i - 1]
 
 
-def get_value_tuple(sheet, row):
-    l = []
-    for x in column_nums:
-        if x == 7:
-            l.append(get_gender(int(sheet.cell(row, x).value)))
-        else:
-            # print type(sheet.cell(row, x).value), get_cell_type_text(sheet.cell(row, x).ctype)
-            l.append(unicode(sheet.cell(row, x).value))
+def get_fat_type(i):
+    fat_type = [u'消瘦', u'标准', u'隐藏性肥胖', u'肥胖', u'肌肉性肥胖']
+    return fat_type[i - 1]
+
+
+def read_value(sheet, row):
+    l = [''] * 17
+    l[PATIENT_ID] = row
+    l[DISTRICT] = unicode(sheet.cell(row, 0).value)
+    l[SCHOOL] = unicode(sheet.cell(row, 1).value)
+    l[CLASS] = sheet.cell(row, 2).value
+    l[GRADE] = sheet.cell(row, 3).value
+    l[NAME] = unicode(sheet.cell(row, 4).value)
+    l[GENDER] = get_gender(int(sheet.cell(row, 5).value))
+    l[DOB] = sheet.cell(row, 6).value
+    l[CONTACT_INFO] = sheet.cell(row, 7).value
+    l[HEIGHT] = sheet.cell(row, 8).value
+    l[WEIGHT] = sheet.cell(row, 9).value
+    l[MEASURED_ANGLE] = get_measured_angle(sheet.cell(row, 10).value)
+    l[FAT] = get_fat(int(sheet.cell(row, 11).value))
+    l[FAT_PERCENTAGE] = float(sheet.cell(row, 12).value)
+    l[BMI] = float(sheet.cell(row, 13).value)
+    l[FAT_TYPE] = get_fat_type(int(sheet.cell(row, 14).value))
+    l[BASIC_METABOLISM] = int(sheet.cell(row, 15).value)
+
     return tuple(l)
 
 
-def get_cell_type_text(type):
-    if type == XL_CELL_TEXT:
-        return "XL_CELL_TEXT"
-    if type == XL_CELL_BOOLEAN:
-        return "XL_CELL_BOOLEAN"
-    if type == XL_CELL_DATE:
-        return "XL_CELL_DATE"
-    if type == XL_CELL_NUMBER:
-        return "XL_CELL_NUMBER"
-    if type == XL_CELL_ERROR:
-        return "XL_CELL_ERROR"
-    return type
+def get_measured_angle(s):
+    # print s
+    v = str(s)
+    if v.isdigit():
+        return int(v)
+    if '.' in v:
+        return max([int(x) for x in v.split('.')])
+    if ',' in v:
+        return max([int(x) for x in v.split(',')])
+    return 0

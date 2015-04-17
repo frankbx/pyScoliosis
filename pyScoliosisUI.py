@@ -21,7 +21,7 @@ wx.ID_2 = 1001
 class MainFormBase(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"脊柱侧凸预防干预信息系统", pos=wx.DefaultPosition,
-                          size=wx.Size(1024, 768), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+                          size=wx.Size(800, 600), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
@@ -78,10 +78,14 @@ class MainFormBase(wx.Frame):
 
         self.txtDistrict = wx.TextCtrl(self.operationPanel, wx.ID_1, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                        0)
+        self.txtDistrict.Enable(False)
+
         gbSizer1.Add(self.txtDistrict, wx.GBPosition(0, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.txtSchool = wx.TextCtrl(self.operationPanel, wx.ID_2, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                      0)
+        self.txtSchool.Enable(False)
+
         gbSizer1.Add(self.txtSchool, wx.GBPosition(1, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.lblClass = wx.StaticText(self.operationPanel, wx.ID_ANY, u"班级：", wx.Point(-1, -1), wx.DefaultSize, 0)
@@ -90,6 +94,8 @@ class MainFormBase(wx.Frame):
 
         self.txtClass = wx.TextCtrl(self.operationPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                     0)
+        self.txtClass.Enable(False)
+
         gbSizer1.Add(self.txtClass, wx.GBPosition(2, 1), wx.GBSpan(1, 2), wx.ALL | wx.EXPAND, 5)
 
         self.lblName = wx.StaticText(self.operationPanel, wx.ID_ANY, u"姓名：", wx.DefaultPosition, wx.DefaultSize, 0)
@@ -106,11 +112,19 @@ class MainFormBase(wx.Frame):
         self.btnExport = wx.Button(self.operationPanel, wx.ID_ANY, u"导出当前数据", wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer1.Add(self.btnExport, wx.GBPosition(4, 2), wx.GBSpan(1, 1), wx.ALL, 5)
 
-        self.cbxFilter = wx.CheckBox(self.operationPanel, wx.ID_ANY, u"只显示未检查病人", wx.DefaultPosition, wx.DefaultSize, 0)
-        gbSizer1.Add(self.cbxFilter, wx.GBPosition(5, 0), wx.GBSpan(1, 3), wx.ALL, 5)
+        self.cbxUnchecked = wx.CheckBox(self.operationPanel, wx.ID_ANY, u"只显示未检查病人", wx.DefaultPosition, wx.DefaultSize,
+                                        0)
+        gbSizer1.Add(self.cbxUnchecked, wx.GBPosition(5, 1), wx.GBSpan(1, 2), wx.ALL, 5)
+
+        self.cbxChecked = wx.CheckBox(self.operationPanel, wx.ID_ANY, u"只显示已检查病人", wx.DefaultPosition, wx.DefaultSize,
+                                      0)
+        gbSizer1.Add(self.cbxChecked, wx.GBPosition(6, 1), wx.GBSpan(1, 2), wx.ALL, 5)
 
         self.btnImport = wx.Button(self.operationPanel, wx.ID_ANY, u"导入数据", wx.DefaultPosition, wx.DefaultSize, 0)
-        gbSizer1.Add(self.btnImport, wx.GBPosition(6, 0), wx.GBSpan(1, 2), wx.ALL, 5)
+        gbSizer1.Add(self.btnImport, wx.GBPosition(7, 0), wx.GBSpan(1, 2), wx.ALL, 5)
+
+        self.btnShowAll = wx.Button(self.operationPanel, wx.ID_ANY, u"显示所有病人", wx.DefaultPosition, wx.DefaultSize, 0)
+        gbSizer1.Add(self.btnShowAll, wx.GBPosition(7, 2), wx.GBSpan(1, 1), wx.ALL, 5)
 
         self.lblDistrict = wx.StaticText(self.operationPanel, wx.ID_ANY, u"区域：", wx.DefaultPosition, wx.DefaultSize, 0)
         self.lblDistrict.Wrap(-1)
@@ -132,8 +146,10 @@ class MainFormBase(wx.Frame):
         self.patientDataTable.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.onRowSelect)
         self.btnSearch.Bind(wx.EVT_BUTTON, self.onSearchClick)
         self.btnExport.Bind(wx.EVT_BUTTON, self.onExportClick)
-        self.cbxFilter.Bind(wx.EVT_CHECKBOX, self.onShowUncheckedOnly)
+        self.cbxUnchecked.Bind(wx.EVT_CHECKBOX, self.onShowUncheckedOnly)
+        self.cbxChecked.Bind(wx.EVT_CHECKBOX, self.onShowCheckedOnly)
         self.btnImport.Bind(wx.EVT_BUTTON, self.import_data)
+        self.btnShowAll.Bind(wx.EVT_BUTTON, self.onShowAll)
 
     def __del__(self):
         pass
@@ -152,7 +168,13 @@ class MainFormBase(wx.Frame):
     def onShowUncheckedOnly(self, event):
         event.Skip()
 
+    def onShowCheckedOnly(self, event):
+        event.Skip()
+
     def import_data(self, event):
+        event.Skip()
+
+    def onShowAll(self, event):
         event.Skip()
 	
 

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
 import os
-import sys
 
 import wx
 
 import pyScoliosisUI as ui
-import pyScoliosisUtils as utils
+from pyScoliosisUtils import *
 from pyScoliosisUtils import column_labels
 
 
@@ -15,29 +14,6 @@ if "2.8" in wx.version():
     from wx.lib.pubsub import pub
 else:
     from wx.lib.pubsub import pub
-
-PATIENT_ID = 0
-DISTRICT = 1
-SCHOOL = 2
-CLASS = 3
-GRADE = 4
-NAME = 5
-GENDER = 6
-DOB = 7
-CONTACT_INFO = 8
-HEIGHT = 9
-WEIGHT = 10
-FAT = 11
-FAT_PERCENTAGE = 12
-BMI = 13
-FAT_TYPE = 14
-BASIC_METABOLISM = 15
-MEASURED_ANGLE = 16
-XRAYNUM = 17
-COBBSECTION = 18
-COBBDEGREE = 19
-IS_CHECKED = 20
-ID = 21
 
 
 class LoginDialog():
@@ -62,17 +38,18 @@ class LoginDialog():
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        if os.path.exists(utils.DB_NAME):
+        print os.path
+        if os.path.exists(DB_NAME):
             print "DB file found!"
         else:
             dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
             if dlg.ShowModal() == wx.ID_YES:
-                utils.create_database()
+                create_database()
             else:
                 sys.exit(-1)
             dlg.Destroy()
-        self.data = utils.load_all_patients()
-        self.isFiltered = False
+        self.data = load_all_patients()
+        # self.isFiltered = False
 
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
@@ -91,7 +68,7 @@ class MainForm(ui.MainFormBase):
         col = event.GetCol()
         checkpatientdialog = CheckPatientDialog(None)
         checkpatientdialog.set_values(self.data[row])
-        print self.data[row][col]
+        # print self.data[row][col]
         if checkpatientdialog.ShowModal() == wx.ID_OK:
             xrayNum = checkpatientdialog.txtXRayNum.GetValue()
             cobbSection = checkpatientdialog.txtCobbSection.GetValue()
@@ -100,27 +77,39 @@ class MainForm(ui.MainFormBase):
             self.data[row][COBBSECTION] = cobbSection
             self.data[row][COBBDEGREE] = cobbDegree
             self.data[row][IS_CHECKED] = 1
-            utils.update_patient_data(self.data[row])
+            update_patient_data(self.data[row])
             self.patientDataTable.Refresh()
         else:
             print "canceled"
         checkpatientdialog.Destroy()
 
-
     def onShowUncheckedOnly(self, event):
-        if self.cbxFilter.GetValue():
-            self.isFiltered = True
-            for each in self.data:
+        self.data = load_all_patients()
+        if self.cbxUnchecked.GetValue():
+            self.cbxChecked.SetValue(False)
+            for each in load_all_patients():
                 if each[IS_CHECKED]:
                     # print str(each[PATIENT_ID]) + " removed"
                     self.data.remove(each)
-        else:
-            self.isFiltered = False
-            self.data = utils.load_all_patients()
         self.setTable(self.data)
 
+    def onShowCheckedOnly(self, event):
+        self.data = load_all_patients()
+        if self.cbxChecked.GetValue():
+            self.cbxUnchecked.SetValue(False)
+            for each in load_all_patients():
+                if not each[IS_CHECKED]:
+                    self.data.remove(each)
+        self.setTable(self.data)
+
+    def onShowAll(self, event):
+        self.data = load_all_patients()
+        self.setTable(self.data)
+        self.cbxUnchecked.SetValue(False)
+        self.cbxChecked.SetValue(False)
+
     def filter_table(self, filter_str):
-        self.data = utils.execute_query(filter_str)
+        self.data = execute_query(filter_str)
         self.setTable(self.data)
 
     def onExportClick(self, event):
@@ -135,7 +124,7 @@ class MainForm(ui.MainFormBase):
             if not os.path.splitext(filename)[1]:
                 filename += '.xls'
         if filename:
-            utils.export_to_excel(filename, self.data)
+            export_to_excel(filename, self.data)
 
     def onSearchClick(self, event):
         formdata = {}
@@ -163,8 +152,8 @@ class MainForm(ui.MainFormBase):
                             wildcard=wildcard)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
-            utils.import_from_excel(filename)
-        self.data = utils.load_all_patients()
+            import_from_excel(filename)
+        self.data = load_all_patients()
         self.setTable(self.data)
 
 
@@ -172,6 +161,8 @@ class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
         self.txtPatientID.SetValue(unicode(patient[PATIENT_ID]))
         self.txtName.SetValue(unicode(patient[NAME]))
+        # print NAME
+        # print unicode(patient[NAME])
         self.txtXRayNum.SetValue(unicode(patient[XRAYNUM]))
         self.txtCobbSection.SetValue(unicode(patient[COBBSECTION]))
         self.txtCobbDegree.SetValue(unicode(patient[COBBDEGREE]))
