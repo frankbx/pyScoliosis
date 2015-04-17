@@ -1,0 +1,1 @@
+D:\pyInstaller\pyinstaller.exe -w --onefile pyScoliosis.py
