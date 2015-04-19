@@ -62,6 +62,7 @@ class MainForm(ui.MainFormBase):
         self.patientDataTable.AutoSize()
         self.patientDataTable.Refresh()
         self.Layout()
+        self.stbStatus.SetStatusText(u"当前显示记录数：" + str(len(self.data)), 0)
 
     def onRowSelect(self, event):
         row = event.GetRow()

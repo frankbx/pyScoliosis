@@ -25,7 +25,7 @@ class MainFormBase(wx.Frame):
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
-        self.m_statusBar1 = self.CreateStatusBar(1, wx.ST_SIZEGRIP, wx.ID_ANY)
+        self.stbStatus = self.CreateStatusBar(1, wx.ST_SIZEGRIP, wx.ID_ANY)
         self.m_menubar1 = wx.MenuBar(0)
         self.fileMenu = wx.Menu()
         self.m_menubar1.Append(self.fileMenu, u"文件")
