@@ -1,1 +1,1 @@
-C:\Python27\Scripts\pyinstaller.exe -w --onefile pyScoliosis.py
+D:\pyInstaller\pyinstaller.exe -w --onefile pyScoliosis.py
