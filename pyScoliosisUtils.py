@@ -143,18 +143,27 @@ def import_from_excel(filename):
 
 
 def get_gender(i):
-    gender = [u'男', u'女']
-    return gender[i - 1]
+    gender = [u'男', u'女', u' ']
+    if i <= 1:
+        return gender[int(i) - 1]
+    else:
+        return gender[2]
 
 
 def get_fat(i):
-    fatness = [u'低', u'标准', u'偏高', u'高']
-    return fatness[i - 1]
+    fatness = [u'低', u'标准', u'偏高', u'高', u'无']
+    if i <= 3:
+        return fatness[int(i) - 1]
+    else:
+        return fatness[4]
 
 
 def get_fat_type(i):
-    fat_type = [u'消瘦', u'标准', u'隐藏性肥胖', u'肥胖', u'肌肉性肥胖']
-    return fat_type[i - 1]
+    fat_type = [u'消瘦', u'标准', u'隐藏性肥胖', u'肥胖', u'肌肉性肥胖', u'无']
+    if i <= 4:
+        return fat_type[int(i) - 1]
+    else:
+        return fat_type[5]
 
 
 def read_value(sheet, row):
@@ -165,17 +174,17 @@ def read_value(sheet, row):
     l[CLASS] = sheet.cell(row, 2).value
     l[GRADE] = sheet.cell(row, 3).value
     l[NAME] = unicode(sheet.cell(row, 4).value)
-    l[GENDER] = get_gender(int(sheet.cell(row, 5).value))
+    l[GENDER] = get_gender(sheet.cell(row, 5).value)
     l[DOB] = sheet.cell(row, 6).value
     l[CONTACT_INFO] = sheet.cell(row, 7).value
     l[HEIGHT] = sheet.cell(row, 8).value
     l[WEIGHT] = sheet.cell(row, 9).value
     l[MEASURED_ANGLE] = get_measured_angle(sheet.cell(row, 10).value)
-    l[FAT] = get_fat(int(sheet.cell(row, 11).value))
-    l[FAT_PERCENTAGE] = float(sheet.cell(row, 12).value)
+    l[FAT] = get_fat(sheet.cell(row, 11).value)
+    l[FAT_PERCENTAGE] = sheet.cell(row, 12).value
     l[BMI] = float(sheet.cell(row, 13).value)
-    l[FAT_TYPE] = get_fat_type(int(sheet.cell(row, 14).value))
-    l[BASIC_METABOLISM] = int(sheet.cell(row, 15).value)
+    l[FAT_TYPE] = get_fat_type(sheet.cell(row, 14).value)
+    l[BASIC_METABOLISM] = sheet.cell(row, 15).value
 
     return tuple(l)
 

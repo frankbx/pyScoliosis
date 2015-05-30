@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 a = Analysis(['pyScoliosis.py'],
-             pathex=['D:\\PythonProjects\\pyScoliosis'],
+             pathex=['C:\\PycharmProjects\\pyScoliosis'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)

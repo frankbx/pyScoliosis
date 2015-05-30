@@ -146,7 +146,7 @@ class MainForm(ui.MainFormBase):
             self.filter_table(formdata)
 
     def import_data(self, event):
-        wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
+        wildcard = u"Excel 文件 (*.xls)|*.xls|Excel 文件 (*.xlsx)|*.xlsx|所有文件 (*.*)|*.*"
         dlg = wx.FileDialog(self, u"从文件导入数据",
                             os.getcwd(),
                             style=wx.OPEN,
