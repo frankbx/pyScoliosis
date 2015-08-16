@@ -8,7 +8,6 @@ import pyScoliosisUI as ui
 from pyScoliosisUtils import *
 from pyScoliosisUtils import column_labels
 
-
 if "2.8" in wx.version():
     import wx.lib.pubsub.setupkwargs
     from wx.lib.pubsub import pub
@@ -49,11 +48,8 @@ class MainForm(ui.MainFormBase):
                 sys.exit(-1)
             dlg.Destroy()
         self.data = load_all_patients()
-        # self.isFiltered = False
-
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
-
 
     def setTable(self, d):
         table = PatientTable(d)
@@ -69,7 +65,6 @@ class MainForm(ui.MainFormBase):
         col = event.GetCol()
         checkpatientdialog = CheckPatientDialog(None)
         checkpatientdialog.set_values(self.data[row])
-        # print self.data[row][col]
         if checkpatientdialog.ShowModal() == wx.ID_OK:
             xrayNum = checkpatientdialog.txtXRayNum.GetValue()
             cobbSection = checkpatientdialog.txtCobbSection.GetValue()
@@ -90,7 +85,6 @@ class MainForm(ui.MainFormBase):
             self.cbxChecked.SetValue(False)
             for each in load_all_patients():
                 if each[IS_CHECKED]:
-                    # print str(each[PATIENT_ID]) + " removed"
                     self.data.remove(each)
         self.setTable(self.data)
 
@@ -130,23 +124,18 @@ class MainForm(ui.MainFormBase):
     def onSearchClick(self, event):
         formdata = {}
         if self.txtDistrict.GetValue().strip():
-            # print "district: " + self.txtDistrict.GetValue()
             formdata["[district]"] = self.txtDistrict.GetValue()
         if self.txtSchool.GetValue().strip():
-            # print "school: " + self.txtSchool.GetValue().strip()
             formdata["[school]"] = self.txtSchool.GetValue().strip()
         if self.txtClass.GetValue().strip():
-            # print "class: " + self.txtClass.GetValue().strip()
             formdata["[class]"] = self.txtClass.GetValue().strip()
         if self.txtName.GetValue().strip():
-            # print "Name: " + self.txtName.GetValue().strip()
             formdata["[name]"] = self.txtName.GetValue().strip()
-        # print formdata
         if not len(formdata) == 0:
             self.filter_table(formdata)
 
     def import_data(self, event):
-        wildcard = u"Excel 文件 (*.xls)|*.xls|Excel 文件 (*.xlsx)|*.xlsx|所有文件 (*.*)|*.*"
+        wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
         dlg = wx.FileDialog(self, u"从文件导入数据",
                             os.getcwd(),
                             style=wx.OPEN,
@@ -162,8 +151,6 @@ class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
         self.txtPatientID.SetValue(unicode(patient[PATIENT_ID]))
         self.txtName.SetValue(unicode(patient[NAME]))
-        # print NAME
-        # print unicode(patient[NAME])
         self.txtXRayNum.SetValue(unicode(patient[XRAYNUM]))
         self.txtCobbSection.SetValue(unicode(patient[COBBSECTION]))
         self.txtCobbDegree.SetValue(unicode(patient[COBBDEGREE]))
@@ -173,7 +160,6 @@ class PatientTable(wx.grid.PyGridTableBase):
     def __init__(self, data):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
-        # print len(self.data)
         self.colLabels = column_labels
 
     def GetNumberRows(self):
