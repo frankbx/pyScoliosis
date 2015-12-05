@@ -37,7 +37,7 @@ class LoginDialog():
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        print os.path
+        # print os.path
         if os.path.exists(DB_NAME):
             print "DB file found!"
         else:
