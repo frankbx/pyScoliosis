@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 from xlwt import Workbook

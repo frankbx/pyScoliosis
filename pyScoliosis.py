@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
 import os
+import sys
 
 import wx
 
@@ -208,7 +209,7 @@ if __name__ == '__main__':
     else:
         dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
-            create_database()
+            utils.create_database()
         else:
             sys.exit(-1)
         dlg.Destroy()
