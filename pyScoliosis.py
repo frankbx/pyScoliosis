@@ -6,9 +6,7 @@ import sys
 import wx
 
 import pyScoliosisUI as ui
-from pyScoliosisUtils import *
-# from pyScoliosisUtils import column_labels
-import utils
+import pyScoliosisUtils
 
 
 # if "2.8" in wx.version():
@@ -40,7 +38,7 @@ import utils
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        self.util = utils.ScoliosisUtils()
+        self.util = pyScoliosisUtils.ScoliosisUtils()
         self.data = self.util.load_all_patients()
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
@@ -154,6 +152,10 @@ class MainForm(ui.MainFormBase):
                 msg_duplicate = ''
                 msg_errors = ''
                 msg.Destroy()
+            else:
+                msg_duplicate = ''
+                msg_errors = ''
+                msg.Destroy()
         self.data = self.util.load_all_patients()
         self.setTable(self.data)
 
@@ -171,7 +173,7 @@ class PatientTable(wx.grid.PyGridTableBase):
     def __init__(self, data):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
-        self.colLabels = column_labels
+        self.colLabels = pyScoliosisUtils.column_labels
 
     def GetNumberRows(self):
         return len(self.data)
@@ -204,12 +206,12 @@ class PatientTable(wx.grid.PyGridTableBase):
 
 if __name__ == '__main__':
     app = wx.App()
-    if os.path.exists(DB_NAME):
+    if os.path.exists(pyScoliosisUtils.DB_NAME):
         print "DB file found!"
     else:
         dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
-            utils.create_database()
+            pyScoliosisUtils.create_database()
         else:
             sys.exit(-1)
         dlg.Destroy()
