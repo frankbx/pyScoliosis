@@ -58,15 +58,16 @@ class MainForm(ui.MainFormBase):
         checkpatientdialog = CheckPatientDialog(None)
         checkpatientdialog.set_values(self.data[row])
         if checkpatientdialog.ShowModal() == wx.ID_OK:
-            xrayNum = checkpatientdialog.txtXRayNum.GetValue()
-            cobbSection = checkpatientdialog.txtCobbSection.GetValue()
-            cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
-            self.data[row].x_ray_num = xrayNum
-            self.data[row].cobb_section = cobbSection
-            self.data[row].cobb_degree = cobbDegree
-            self.data[row].is_checked = True
-            update_patient_data(self.data[row])
-            self.patientDataTable.Refresh()
+            # xrayNum = checkpatientdialog.txtXRayNum.GetValue()
+            # cobbSection = checkpatientdialog.txtCobbSection.GetValue()
+            # cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
+            # self.data[row].x_ray_num = xrayNum
+            # self.data[row].cobb_section = cobbSection
+            # self.data[row].cobb_degree = cobbDegree
+            # self.data[row].is_checked = True
+            # update_patient_data(self.data[row])
+            # self.patientDataTable.Refresh()
+            pass
         else:
             print "canceled"
         checkpatientdialog.Destroy()
@@ -99,8 +100,9 @@ class MainForm(ui.MainFormBase):
         pass
 
     def filter_table(self, filter_str):
-        self.data = execute_query(filter_str)
-        self.setTable(self.data)
+        # self.data = execute_query(filter_str)
+        # self.setTable(self.data)
+        pass
 
     def onExportClick(self, event):
         wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
