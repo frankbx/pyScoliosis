@@ -2,11 +2,10 @@
 # !/bin/env python
 import sqlite3
 
-from xlwt import Workbook
-from xlrd import *
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy as sa
+
 from Models import Patient
 
 PATIENT_ID = 0
@@ -67,41 +66,8 @@ def connect_database():
     return session
 
 
-def create_database():
-    engine = create_engine('sqlite:///./data.db')
-    metadata = MetaData(engine)
-
-    patients = Table('patients', metadata,
-                     sa.Column('id', sa.Integer(), nullable=False),
-                     sa.Column('name', sa.Unicode(length=10), nullable=True),
-                     sa.Column('district', sa.Unicode(length=10), nullable=True),
-                     sa.Column('school', sa.Unicode(length=20), nullable=True),
-                     sa.Column('grade', sa.Unicode(length=20), nullable=True),
-                     sa.Column('class_name', sa.Unicode(length=10), nullable=True),
-                     sa.Column('gender', sa.Unicode(length=5), nullable=True),
-                     sa.Column('dob', sa.Date(), nullable=True),
-                     sa.Column('contact_info', sa.Unicode(length=20), nullable=True),
-                     sa.Column('height', sa.Float(), nullable=True),
-                     sa.Column('weight', sa.Float(), nullable=True),
-                     sa.Column('fat', sa.Unicode(length=10), nullable=True),
-                     sa.Column('fat_percentage', sa.Float(), nullable=True),
-                     sa.Column('bmi', sa.Float(), nullable=True),
-                     sa.Column('fat_type', sa.Unicode(length=10), nullable=True),
-                     sa.Column('basic_metabolism', sa.Integer(), nullable=True),
-                     sa.Column('measured_angle', sa.Float(), nullable=True),
-                     sa.Column('x_ray_num', sa.Unicode(), nullable=True),
-                     sa.Column('cobb_section', sa.Unicode(length=20), nullable=True),
-                     sa.Column('cobb_degree', sa.Float(), nullable=True),
-                     sa.Column('is_checked', sa.Boolean(), nullable=True),
-                     sa.PrimaryKeyConstraint('id'),
-                     sa.UniqueConstraint('district', 'school', 'grade', 'class_name', 'name', 'gender', 'dob'))
-    metadata.create_all()
 
 
-def load_all_patients():
-    session = connect_database()
-    data = session.query(Patient).all()
-    return data
 
 
 def update_patient_data(patient):
@@ -126,89 +92,10 @@ def execute_query(conditions):
     return [list(i) for i in data]
 
 
-def export_to_excel(filename, data):
-    # print filename
-    # print len(data)
-    book = Workbook()
-    sheet = book.add_sheet(u"病人信息")
-    for i in range(0, len(column_labels)):
-        sheet.row(0).write(i, column_labels[i])
-
-    for x in range(0, len(data)):
-        for y in range(0, len(column_labels)):
-            sheet.row(x + 1).write(y, data[x][y])
-
-    book.save(filename)
 
 
-def import_from_excel(filename):
-    # print filename
-    book = open_workbook(filename)
-    sheet = book.sheet_by_index(0)
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    # print sheet.nrows
-    for i in range(1, sheet.nrows):
-        cursor.execute(INSERT_INTO_PATIENT, read_value(sheet, i))
-    conn.commit()
-    conn.close()
-    read_value(sheet, 1)
 
 
-def get_gender(i):
-    gender = [u'男', u'女', u' ']
-    if i <= 1:
-        return gender[int(i) - 1]
-    else:
-        return gender[2]
 
 
-def get_fat(i):
-    fatness = [u'低', u'标准', u'偏高', u'高', u'无']
-    if i <= 3:
-        return fatness[int(i) - 1]
-    else:
-        return fatness[4]
 
-
-def get_fat_type(i):
-    fat_type = [u'消瘦', u'标准', u'隐藏性肥胖', u'肥胖', u'肌肉性肥胖', u'无']
-    if i <= 4:
-        return fat_type[int(i) - 1]
-    else:
-        return fat_type[5]
-
-
-def read_value(sheet, row):
-    l = [''] * 17
-    l[PATIENT_ID] = row
-    l[DISTRICT] = unicode(sheet.cell(row, 0).value)
-    l[SCHOOL] = unicode(sheet.cell(row, 1).value)
-    l[CLASS] = sheet.cell(row, 2).value
-    l[GRADE] = sheet.cell(row, 3).value
-    l[NAME] = unicode(sheet.cell(row, 4).value)
-    l[GENDER] = get_gender(sheet.cell(row, 5).value)
-    l[DOB] = sheet.cell(row, 6).value
-    l[CONTACT_INFO] = sheet.cell(row, 7).value
-    l[HEIGHT] = sheet.cell(row, 8).value
-    l[WEIGHT] = sheet.cell(row, 9).value
-    l[MEASURED_ANGLE] = get_measured_angle(sheet.cell(row, 10).value)
-    l[FAT] = get_fat(sheet.cell(row, 11).value)
-    l[FAT_PERCENTAGE] = sheet.cell(row, 12).value
-    l[BMI] = float(sheet.cell(row, 13).value)
-    l[FAT_TYPE] = get_fat_type(sheet.cell(row, 14).value)
-    l[BASIC_METABOLISM] = sheet.cell(row, 15).value
-
-    return tuple(l)
-
-
-def get_measured_angle(s):
-    # print s
-    v = str(s)
-    if v.isdigit():
-        return int(v)
-    if '.' in v:
-        return max([int(x) for x in v.split('.')])
-    if ',' in v:
-        return max([int(x) for x in v.split(',')])
-    return 0

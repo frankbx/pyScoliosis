@@ -6,7 +6,7 @@ import wx
 
 import pyScoliosisUI as ui
 from pyScoliosisUtils import *
-from pyScoliosisUtils import column_labels
+# from pyScoliosisUtils import column_labels
 import utils
 
 
@@ -39,10 +39,10 @@ import utils
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        self.data = load_all_patients()
+        self.util = utils.ScoliosisUtils()
+        self.data = self.util.load_all_patients()
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
-        self.util = utils.ScoliosisUtils()
 
     def setTable(self, d):
         table = PatientTable(d)
@@ -73,28 +73,31 @@ class MainForm(ui.MainFormBase):
         checkpatientdialog.Destroy()
 
     def onShowUncheckedOnly(self, event):
-        self.data = load_all_patients()
-        if self.cbxUnchecked.GetValue():
-            self.cbxChecked.SetValue(False)
-            for each in load_all_patients():
-                if each.is_checked:
-                    self.data.remove(each)
-        self.setTable(self.data)
+        # self.data = load_all_patients()
+        # if self.cbxUnchecked.GetValue():
+        #     self.cbxChecked.SetValue(False)
+        #     for each in load_all_patients():
+        #         if each.is_checked:
+        #             self.data.remove(each)
+        # self.setTable(self.data)
+        pass
 
     def onShowCheckedOnly(self, event):
-        self.data = load_all_patients()
-        if self.cbxChecked.GetValue():
-            self.cbxUnchecked.SetValue(False)
-            for each in load_all_patients():
-                if not each.is_checked:
-                    self.data.remove(each)
-        self.setTable(self.data)
+        # self.data = load_all_patients()
+        # if self.cbxChecked.GetValue():
+        #     self.cbxUnchecked.SetValue(False)
+        #     for each in load_all_patients():
+        #         if not each.is_checked:
+        #             self.data.remove(each)
+        # self.setTable(self.data)
+        pass
 
     def onShowAll(self, event):
-        self.data = load_all_patients()
-        self.setTable(self.data)
-        self.cbxUnchecked.SetValue(False)
-        self.cbxChecked.SetValue(False)
+        # self.data = load_all_patients()
+        # self.setTable(self.data)
+        # self.cbxUnchecked.SetValue(False)
+        # self.cbxChecked.SetValue(False)
+        pass
 
     def filter_table(self, filter_str):
         self.data = execute_query(filter_str)
@@ -112,20 +115,21 @@ class MainForm(ui.MainFormBase):
             if not os.path.splitext(filename)[1]:
                 filename += '.xls'
         if filename:
-            export_to_excel(filename, self.data)
+            self.util.export_to_excel(filename, self.data)
 
     def onSearchClick(self, event):
-        formdata = {}
-        if self.txtDistrict.GetValue().strip():
-            formdata["[district]"] = self.txtDistrict.GetValue()
-        if self.txtSchool.GetValue().strip():
-            formdata["[school]"] = self.txtSchool.GetValue().strip()
-        if self.txtClass.GetValue().strip():
-            formdata["[class]"] = self.txtClass.GetValue().strip()
-        if self.txtName.GetValue().strip():
-            formdata["[name]"] = self.txtName.GetValue().strip()
-        if not len(formdata) == 0:
-            self.filter_table(formdata)
+        # formdata = {}
+        # if self.txtDistrict.GetValue().strip():
+        #     formdata["[district]"] = self.txtDistrict.GetValue()
+        # if self.txtSchool.GetValue().strip():
+        #     formdata["[school]"] = self.txtSchool.GetValue().strip()
+        # if self.txtClass.GetValue().strip():
+        #     formdata["[class]"] = self.txtClass.GetValue().strip()
+        # if self.txtName.GetValue().strip():
+        #     formdata["[name]"] = self.txtName.GetValue().strip()
+        # if not len(formdata) == 0:
+        #     self.filter_table(formdata)
+        pass
 
     def import_data(self, event):
         wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
@@ -149,7 +153,7 @@ class MainForm(ui.MainFormBase):
                 msg_duplicate = ''
                 msg_errors = ''
                 msg.Destroy()
-        self.data = load_all_patients()
+        self.data = self.util.load_all_patients()
         self.setTable(self.data)
 
 
@@ -178,7 +182,7 @@ class PatientTable(wx.grid.PyGridTableBase):
         return False
 
     def GetValue(self, row, col):
-        v = self.data[row].to_list()[col]
+        v = self.data[row][col]
         if v is None:
             return ''
         else:
