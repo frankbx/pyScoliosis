@@ -7,49 +7,42 @@ import wx
 import pyScoliosisUI as ui
 from pyScoliosisUtils import *
 from pyScoliosisUtils import column_labels
-
-if "2.8" in wx.version():
-    import wx.lib.pubsub.setupkwargs
-    from wx.lib.pubsub import pub
-else:
-    from wx.lib.pubsub import pub
+import utils
 
 
-class LoginDialog():
-    def __init__(self, parent):
-        ui.LoginDialogBase.__init__(self, parent)
-
-    def login(self, event):
-        stupid_password = "password"
-        user_password = self.txt_password.GetValue()
-        if user_password == stupid_password:
-            print "You are now logged in!"
-            pub.sendMessage("frameListener", message="show")
-            self.Destroy()
-        else:
-            print "Username or password is incorrect!"
-            self.Destroy()
-
-    def cancel(self, event):
-        self.Destroy()
+# if "2.8" in wx.version():
+#     import wx.lib.pubsub.setupkwargs
+#     from wx.lib.pubsub import pub
+# else:
+#     from wx.lib.pubsub import pub
+#
+#
+# class LoginDialog():
+#     def __init__(self, parent):
+#         ui.LoginDialogBase.__init__(self, parent)
+#
+#     def login(self, event):
+#         stupid_password = "password"
+#         user_password = self.txt_password.GetValue()
+#         if user_password == stupid_password:
+#             print "You are now logged in!"
+#             pub.sendMessage("frameListener", message="show")
+#             self.Destroy()
+#         else:
+#             print "Username or password is incorrect!"
+#             self.Destroy()
+#
+#     def cancel(self, event):
+#         self.Destroy()
 
 
 class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
-        # print os.path
-        if os.path.exists(DB_NAME):
-            print "DB file found!"
-        else:
-            dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
-            if dlg.ShowModal() == wx.ID_YES:
-                create_database()
-            else:
-                sys.exit(-1)
-            dlg.Destroy()
         self.data = load_all_patients()
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
+        self.util = utils.ScoliosisUtils()
 
     def setTable(self, d):
         table = PatientTable(d)
@@ -69,10 +62,10 @@ class MainForm(ui.MainFormBase):
             xrayNum = checkpatientdialog.txtXRayNum.GetValue()
             cobbSection = checkpatientdialog.txtCobbSection.GetValue()
             cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
-            self.data[row][XRAYNUM] = xrayNum
-            self.data[row][COBBSECTION] = cobbSection
-            self.data[row][COBBDEGREE] = cobbDegree
-            self.data[row][IS_CHECKED] = 1
+            self.data[row].x_ray_num = xrayNum
+            self.data[row].cobb_section = cobbSection
+            self.data[row].cobb_degree = cobbDegree
+            self.data[row].is_checked = True
             update_patient_data(self.data[row])
             self.patientDataTable.Refresh()
         else:
@@ -84,7 +77,7 @@ class MainForm(ui.MainFormBase):
         if self.cbxUnchecked.GetValue():
             self.cbxChecked.SetValue(False)
             for each in load_all_patients():
-                if each[IS_CHECKED]:
+                if each.is_checked:
                     self.data.remove(each)
         self.setTable(self.data)
 
@@ -93,7 +86,7 @@ class MainForm(ui.MainFormBase):
         if self.cbxChecked.GetValue():
             self.cbxUnchecked.SetValue(False)
             for each in load_all_patients():
-                if not each[IS_CHECKED]:
+                if not each.is_checked:
                     self.data.remove(each)
         self.setTable(self.data)
 
@@ -142,18 +135,31 @@ class MainForm(ui.MainFormBase):
                             wildcard=wildcard)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
-            import_from_excel(filename)
+            r = self.util.import_from_excel(filename)
+            msg_duplicate = ''
+            msg_errors = ''
+            if r[1] > 0:
+                # print "check  duplicated file"
+                msg_duplicate = u"发现重复数据并已忽略。请检查 重复数据.xls 查看重复数据。"
+            if r[0] > 0:
+                # print "check errors file"
+                msg_errors = u"发现数据有错。错误数据已输出到 错误数据.xls。请更改数据后重新导入。"
+            msg = wx.MessageDialog(None, u'数据导入完成！' + msg_errors + msg_duplicate, u'警告', wx.OK | wx.ICON_WARNING)
+            if msg.ShowModal() == wx.OK:
+                msg_duplicate = ''
+                msg_errors = ''
+                msg.Destroy()
         self.data = load_all_patients()
         self.setTable(self.data)
 
 
 class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
-        self.txtPatientID.SetValue(unicode(patient[PATIENT_ID]))
-        self.txtName.SetValue(unicode(patient[NAME]))
-        self.txtXRayNum.SetValue(unicode(patient[XRAYNUM]))
-        self.txtCobbSection.SetValue(unicode(patient[COBBSECTION]))
-        self.txtCobbDegree.SetValue(unicode(patient[COBBDEGREE]))
+        self.txtPatientID.SetValue(unicode(patient.id))
+        self.txtName.SetValue(unicode(patient.name))
+        self.txtXRayNum.SetValue(unicode(patient.x_ray_num))
+        self.txtCobbSection.SetValue(unicode(patient.cobb_section))
+        self.txtCobbDegree.SetValue(unicode(patient.cobb_degree))
 
 
 class PatientTable(wx.grid.PyGridTableBase):
@@ -172,8 +178,11 @@ class PatientTable(wx.grid.PyGridTableBase):
         return False
 
     def GetValue(self, row, col):
-        return self.data[row][col]
-        # pass
+        v = self.data[row].to_list()[col]
+        if v is None:
+            return ''
+        else:
+            return v
 
     def SetValue(self, row, col, value):
         pass
@@ -190,6 +199,15 @@ class PatientTable(wx.grid.PyGridTableBase):
 
 if __name__ == '__main__':
     app = wx.App()
+    if os.path.exists(DB_NAME):
+        print "DB file found!"
+    else:
+        dlg = wx.MessageDialog(None, u'数据库文件不存在，要创建空白数据库文件吗？点击“否”将退出程序。', u'警告', wx.YES_NO | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            create_database()
+        else:
+            sys.exit(-1)
+        dlg.Destroy()
     frame = MainForm()
     frame.Show(True)
     app.MainLoop()
