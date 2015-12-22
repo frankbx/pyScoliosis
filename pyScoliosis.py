@@ -7,7 +7,7 @@ import wx
 
 import pyScoliosisUI as ui
 import pyScoliosisUtils
-from Models import attribute_mapper, column_mapper
+from Models import attribute_mapper
 
 
 # if "2.8" in wx.version():
@@ -43,6 +43,19 @@ class MainForm(ui.MainFormBase):
         self.data = self.util.load_all_patients()
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
+        districts = self.util.get_distinct_districts()
+        # print type(districts[0])
+        # print dir(districts[0])
+        # print districts[0].district
+        self.district_choice.Append(u"全部区")
+        self.school_choice.Append(u'全部学校')
+        self.grade_choice.Append(u'全部年级')
+        self.class_choice.Append(u'全部班级')
+        for each in districts:
+            self.district_choice.Append(each)
+        schools = self.util.get_distinct_schools()
+        for each in schools:
+            self.school_choice.Append(each)
 
     def setTable(self, d):
         table = PatientTable(d)

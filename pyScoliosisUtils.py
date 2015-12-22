@@ -3,10 +3,9 @@
 
 import unittest
 
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine, MetaData, Table, distinct
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql import text
 from xlwt import Workbook
 from xlrd import *
 import sqlalchemy as sa
@@ -145,22 +144,28 @@ class ScoliosisUtils:
         self.session.commit()
 
     def get_distinct_districts(self):
-        sql = 'SELECT DISTINCT(district) FROM patients'
-        s = text(sql)
-        districts = self.get_session().execute(s).fetchall()
-        return districts
+        # sql = 'SELECT DISTINCT(district) FROM patients'
+        # s = text(sql)
+        districts = self.get_session().query(distinct(Patient.district)).all()
+        print districts
+        l =[]
+        for each in districts:
+            l.append(each[0])
+        # print l
+        return l
 
     def get_distinct_schools(self, district=None):
-        sql = 'SELECT DISTINCT(school) FROM patients'
+        #
+        q = self.get_session().query(distinct(Patient.school))
         if district is not None:
-            sql = 'SELECT DISTINCT(school) FROM patients WHERE district = :district'
-            schools = self.get_session().execute(text(sql), {'district': district}).fetchall()
-            print text(sql)
-            return schools
+            q = q.filter(Patient.district == district)
         # print sql, ' WHERE district = ', district
-        print text(sql)
-        schools = self.get_session().execute(text(sql)).fetchall()
-        return schools
+        schools = q.all()
+        l =[]
+        for each in schools:
+            l.append(each[0])
+
+        return l
 
     def get_distinct_grade(self, school=None):
         pass
