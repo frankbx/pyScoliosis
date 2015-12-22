@@ -43,10 +43,9 @@ class MainForm(ui.MainFormBase):
         self.data = self.util.load_all_patients()
         self.patientDataTable.SetRowLabelSize(0)
         self.setTable(self.data)
+
+        # TODO need to refactor below into separate functions
         districts = self.util.get_distinct_districts()
-        # print type(districts[0])
-        # print dir(districts[0])
-        # print districts[0].district
         self.district_choice.Append(u"全部区")
         self.school_choice.Append(u'全部学校')
         self.grade_choice.Append(u'全部年级')
@@ -56,6 +55,28 @@ class MainForm(ui.MainFormBase):
         schools = self.util.get_distinct_schools()
         for each in schools:
             self.school_choice.Append(each)
+
+    def choose_district(self, event):
+        '''
+        When user select a district from dropdown list, below things should happen:
+        1. Update School dropdown list to include only schools in the district
+        2. Update Grid data to include only patients belong to this district
+        '''
+        pass
+
+    def choose_school(self, event):
+        '''
+        When user select a school from dropdown list, below things should happen:
+        1. Load distinct grade values belong to this school
+        2. Update Grid data to include only patients belong to this school
+        '''
+        pass
+
+    def choose_grade(self, event):
+        pass
+
+    def choose_class(self, event):
+        pass
 
     def setTable(self, d):
         table = PatientTable(d)
@@ -82,13 +103,8 @@ class MainForm(ui.MainFormBase):
             self.util.save_patient(self.data[row])
             self.data = self.util.load_all_patients()
             self.setTable(self.data)
-            # self.patientDataTable.SetValue(row, column_mapper['xraynum'], xrayNum)
-            # self.patientDataTable.SetValue(row, column_mapper['cobbsection'], cobbSection)
-            # self.patientDataTable.SetValue(row, column_mapper['cobbdegree'], cobbDegree)
-            # self.patientDataTable.SetValue(row, column_mapper['is_checked'], True)
-            # self.patientDataTable.Refresh()
         else:
-            print "canceled"
+            pass
         checkpatientdialog.Destroy()
 
     def onShowUncheckedOnly(self, event):
@@ -109,14 +125,12 @@ class MainForm(ui.MainFormBase):
             #     if not each.is_checked:
             #         self.data.remove(each)
         self.setTable(self.data)
-        # pass
 
     def onShowAll(self, event):
         self.data = self.util.load_all_patients()
         self.setTable(self.data)
         self.cbxUnchecked.SetValue(False)
         self.cbxChecked.SetValue(False)
-        # pass
 
     def filter_table(self, filter_str):
         # self.data = execute_query(filter_str)

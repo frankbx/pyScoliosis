@@ -18,9 +18,6 @@ column_labels = [u"编号", u"区域", u"学校", u"年级", u"班级", u"姓名
 DB_NAME = 'data.db'
 
 
-# TODO change search area from TextField to drop down list
-# TODO load distinct areas to District drop down
-# TODO load distinct Schools to School drop down
 # TODO load distinct Grade to Grade drop down
 # TODO load distinct Classes to Classes drop down
 # TODO Change the drop down content based on user selection
@@ -147,31 +144,29 @@ class ScoliosisUtils:
         # sql = 'SELECT DISTINCT(district) FROM patients'
         # s = text(sql)
         districts = self.get_session().query(distinct(Patient.district)).all()
-        print districts
-        l =[]
-        for each in districts:
-            l.append(each[0])
-        # print l
-        return l
+        return [each[0] for each in districts]
 
     def get_distinct_schools(self, district=None):
-        #
         q = self.get_session().query(distinct(Patient.school))
         if district is not None:
             q = q.filter(Patient.district == district)
-        # print sql, ' WHERE district = ', district
         schools = q.all()
-        l =[]
-        for each in schools:
-            l.append(each[0])
-
-        return l
+        return [each[0] for each in schools]
 
     def get_distinct_grade(self, school=None):
-        pass
+        q = self.get_session().query(distinct(Patient.grade))
+        if school is not None:
+            q = q.filter(Patient.school == school)
+        grades = q.all()
+        return [each[0] for each in grades]
 
     def get_distinct_classes(self, school=None, grade=None):
-        pass
+        if school is None or grade is None:
+            return []
+        else:
+            classes = self.get_session().query(distinct(Patient.class_name)).filter(Patient.school == school).filter(
+                Patient.grade == grade).all()
+            return [each[0] for each in classes]
 
 
 class TestUtils(unittest.TestCase):
@@ -198,7 +193,7 @@ class TestUtils(unittest.TestCase):
         print unicode(district)
         schools = self.utils.get_distinct_schools(district=unicode(district))
         # print schools
-        print len(schools)
+        # print len(schools)
         self.assertGreaterEqual(len(schools), 0)
 
     def test_get_distinct_grade(self):

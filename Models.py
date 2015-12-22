@@ -197,18 +197,5 @@ class Patient(Base):
             self.fat_type, self.basic_metabolism, self.xraynum, self.cobbsection, self.cobbdegree, self.is_checked)
 
 
-def check(self, x_ray_num='', cobb_section='', cobb_degree=''):
-    if x_ray_num is None:
-        x_ray_num = ''
-    self.x_ray_num = x_ray_num
-    if cobb_section is None:
-        cobb_section = ''
-    if cobb_degree is None:
-        cobb_degree = 0
-    self.cobb_section = cobb_section
-    self.cobb_degree = cobb_degree
-    self.is_checked = True
-
-
 if __name__ == '__main__':
     unittest.main()
