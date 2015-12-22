@@ -3,7 +3,7 @@
 import unittest
 import logging
 
-from sqlalchemy import Column, Integer, Float, Boolean, create_engine, MetaData, Unicode
+from sqlalchemy import Column, Integer, Float, Boolean, MetaData, Unicode
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -14,6 +14,16 @@ column_mapper = {u"编号"  : 0, u"区域": 1, u"学校": 2, u"年级": 3, u"班
                  u"脂肪含量": 13, u"BMI指数": 14, u"肥胖类型": 15, u"基础代谢": 16, u"X光片号": 17, u"Cobb角节段": 18, u"Cobb角度数": 19,
                  u"已复查" : 20}
 
+attribute_mapper = {0 : 'id', 1: 'district', 2: 'school', 3: 'grade', 4: 'class_name', 5: 'name', 6: 'gender',
+                    7 : 'dob',
+                    8 : 'contact_info',
+                    9 : 'height',
+                    10: 'weight', 11: 'measured_angle', 12: 'fat',
+                    13: 'fat_percentage', 14: 'bmi', 15: 'fat_type', 16: 'basic_metabolism', 17: 'xraynum',
+                    18: 'cobbsection',
+                    19: 'cobbdegree',
+                    20: 'is_checked'}
+
 genders = [u'男', u'女', u'']
 
 fatness = [u'低', u'标准', u'偏高', u'高', u'']
@@ -23,9 +33,11 @@ fat_type = [u'消瘦', u'标准', u'隐藏性肥胖', u'肥胖', u'肌肉性肥�
 
 class TestPatient(unittest.TestCase):
     def setUp(self):
-        self.engine = create_engine('sqlite:///./data-dev.db')
+        # self.engine = create_engine('sqlite:///./data-dev.db')
+        import pyScoliosisUtils
+        self.engine = pyScoliosisUtils.create_database(env='Dev')
         self.metadata = MetaData(self.engine)
-        self.metadata.create_all(self.engine)
+        # self.metadata.create_all(self.engine)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         self.p = Patient()
@@ -98,9 +110,9 @@ class Patient(Base):
     fat_type = Column(Unicode(10), default='')
     basic_metabolism = Column(Integer)
     measured_angle = Column(Float)
-    x_ray_num = Column(Unicode, default='')
-    cobb_section = Column(Unicode(20), default='')
-    cobb_degree = Column(Unicode(20), default=0)
+    xraynum = Column(Unicode, default='')
+    cobbsection = Column(Unicode(20), default='')
+    cobbdegree = Column(Unicode(20), default=0)
     is_checked = Column(Boolean, nullable=False, default=False)
 
     def load_from_list(self, values):
@@ -118,8 +130,8 @@ class Patient(Base):
         else:
             raise ValueError('Wrong Gender %s', v)
 
-        self.dob = int(values[column_mapper[u"生日"]])
-        self.contact_info = int(values[column_mapper[u"家长手机"]])
+        self.dob = values[column_mapper[u"生日"]]
+        self.contact_info = values[column_mapper[u"家长手机"]]
         try:
             self.height = float(values[column_mapper[u"身高"]])
         except ValueError:
@@ -163,9 +175,9 @@ class Patient(Base):
             self.measured_angle = float(values[column_mapper[u"测量角度"]])
         except ValueError:
             logging.error(unicode(self.measured_angle))
-        self.x_ray_num = values[column_mapper[u"X光片号"]]
-        self.cobb_section = values[column_mapper[u"Cobb角节段"]]
-        self.cobb_degree = values[column_mapper[u"Cobb角度数"]]
+        self.xraynum = values[column_mapper[u"X光片号"]]
+        self.cobbsection = values[column_mapper[u"Cobb角节段"]]
+        self.cobbdegree = values[column_mapper[u"Cobb角度数"]]
         v = values[column_mapper[u"已复查"]]
         if v == '' or v is False or v == 0:
             self.is_checked = False
@@ -175,14 +187,14 @@ class Patient(Base):
     def to_list(self):
         return [self.id, self.district, self.school, self.grade, self.class_name, self.name, self.gender, self.dob,
                 self.contact_info, self.height, self.weight, self.measured_angle, self.fat, self.fat_percentage,
-                self.bmi, self.fat_type, self.basic_metabolism, self.x_ray_num, self.cobb_section, self.cobb_degree,
+                self.bmi, self.fat_type, self.basic_metabolism, self.xraynum, self.cobbsection, self.cobbdegree,
                 self.is_checked]
 
     def __repr__(self):
         return '[Patient: %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s]' % (
-            self.patient_id, self.district, self.school, self.class_name, self.name, self.gender, self.dob,
+            self.id, self.district, self.school, self.class_name, self.name, self.gender, self.dob,
             self.contact_info, self.height, self.weight, self.measured_angle, self.fat, self.fat_percentage, self.bmi,
-            self.fat_type, self.basic_metabolism, self.x_ray_num, self.cobb_section, self.cobb_degree, self.is_checked)
+            self.fat_type, self.basic_metabolism, self.xraynum, self.cobbsection, self.cobbdegree, self.is_checked)
 
 
 def check(self, x_ray_num='', cobb_section='', cobb_degree=''):

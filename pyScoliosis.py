@@ -7,6 +7,7 @@ import wx
 
 import pyScoliosisUI as ui
 import pyScoliosisUtils
+from Models import attribute_mapper, column_mapper
 
 
 # if "2.8" in wx.version():
@@ -58,46 +59,51 @@ class MainForm(ui.MainFormBase):
         checkpatientdialog = CheckPatientDialog(None)
         checkpatientdialog.set_values(self.data[row])
         if checkpatientdialog.ShowModal() == wx.ID_OK:
-            # xrayNum = checkpatientdialog.txtXRayNum.GetValue()
-            # cobbSection = checkpatientdialog.txtCobbSection.GetValue()
-            # cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
-            # self.data[row].x_ray_num = xrayNum
-            # self.data[row].cobb_section = cobbSection
-            # self.data[row].cobb_degree = cobbDegree
-            # self.data[row].is_checked = True
-            # update_patient_data(self.data[row])
+            xrayNum = checkpatientdialog.txtXRayNum.GetValue()
+            cobbSection = checkpatientdialog.txtCobbSection.GetValue()
+            cobbDegree = checkpatientdialog.txtCobbDegree.GetValue()
+            self.data[row].xraynum = xrayNum
+            self.data[row].cobbsection = cobbSection
+            self.data[row].cobbdegree = cobbDegree
+            self.data[row].is_checked = True
+            self.util.save_patient(self.data[row])
+            self.data = self.util.load_all_patients()
+            self.setTable(self.data)
+            # self.patientDataTable.SetValue(row, column_mapper['xraynum'], xrayNum)
+            # self.patientDataTable.SetValue(row, column_mapper['cobbsection'], cobbSection)
+            # self.patientDataTable.SetValue(row, column_mapper['cobbdegree'], cobbDegree)
+            # self.patientDataTable.SetValue(row, column_mapper['is_checked'], True)
             # self.patientDataTable.Refresh()
-            pass
         else:
             print "canceled"
         checkpatientdialog.Destroy()
 
     def onShowUncheckedOnly(self, event):
-        # self.data = load_all_patients()
-        # if self.cbxUnchecked.GetValue():
-        #     self.cbxChecked.SetValue(False)
-        #     for each in load_all_patients():
-        #         if each.is_checked:
-        #             self.data.remove(each)
-        # self.setTable(self.data)
-        pass
+        self.data = self.util.load_all_checked_patients(False)
+        if self.cbxUnchecked.GetValue():
+            self.cbxChecked.SetValue(False)
+            # for each in self.util.load_all_patients():
+            #     if each.is_checked:
+            #         self.data.remove(each)
+        self.setTable(self.data)
+        # pass
 
     def onShowCheckedOnly(self, event):
-        # self.data = load_all_patients()
-        # if self.cbxChecked.GetValue():
-        #     self.cbxUnchecked.SetValue(False)
-        #     for each in load_all_patients():
-        #         if not each.is_checked:
-        #             self.data.remove(each)
-        # self.setTable(self.data)
-        pass
+        self.data = self.util.load_all_checked_patients(True)
+        if self.cbxChecked.GetValue():
+            self.cbxUnchecked.SetValue(False)
+            # for each in self.util.load_all_patients():
+            #     if not each.is_checked:
+            #         self.data.remove(each)
+        self.setTable(self.data)
+        # pass
 
     def onShowAll(self, event):
-        # self.data = load_all_patients()
-        # self.setTable(self.data)
-        # self.cbxUnchecked.SetValue(False)
-        # self.cbxChecked.SetValue(False)
-        pass
+        self.data = self.util.load_all_patients()
+        self.setTable(self.data)
+        self.cbxUnchecked.SetValue(False)
+        self.cbxChecked.SetValue(False)
+        # pass
 
     def filter_table(self, filter_str):
         # self.data = execute_query(filter_str)
@@ -166,9 +172,9 @@ class CheckPatientDialog(ui.CheckPatientDialogBase):
     def set_values(self, patient):
         self.txtPatientID.SetValue(unicode(patient.id))
         self.txtName.SetValue(unicode(patient.name))
-        self.txtXRayNum.SetValue(unicode(patient.x_ray_num))
-        self.txtCobbSection.SetValue(unicode(patient.cobb_section))
-        self.txtCobbDegree.SetValue(unicode(patient.cobb_degree))
+        self.txtXRayNum.SetValue(unicode(patient.xraynum))
+        self.txtCobbSection.SetValue(unicode(patient.cobbsection))
+        self.txtCobbDegree.SetValue(unicode(patient.cobbdegree))
 
 
 class PatientTable(wx.grid.PyGridTableBase):
@@ -187,14 +193,14 @@ class PatientTable(wx.grid.PyGridTableBase):
         return False
 
     def GetValue(self, row, col):
-        v = self.data[row][col]
+        v = self.data[row].__dict__[attribute_mapper[col]]
         if v is None:
             return ''
         else:
             return v
 
     def SetValue(self, row, col, value):
-        pass
+        self.data[row].__dict__[attribute_mapper[col]] = value
 
     def GetColLabelValue(self, col):
         return self.colLabels[col]

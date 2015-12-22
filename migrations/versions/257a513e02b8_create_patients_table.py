@@ -36,9 +36,9 @@ def upgrade():
                     sa.Column('fat_type', sa.Unicode(length=10), nullable=True),
                     sa.Column('basic_metabolism', sa.Integer(), nullable=True),
                     sa.Column('measured_angle', sa.Float(), nullable=True),
-                    sa.Column('x_ray_num', sa.Unicode(), nullable=True),
-                    sa.Column('cobb_section', sa.Unicode(length=20), nullable=True),
-                    sa.Column('cobb_degree', sa.Unicode(length=20), nullable=True),
+                    sa.Column('xraynum', sa.Unicode(), nullable=True),
+                    sa.Column('cobbsection', sa.Unicode(length=20), nullable=True),
+                    sa.Column('cobbdegree', sa.Unicode(length=20), nullable=True),
                     sa.Column('is_checked', sa.Boolean(), nullable=False, default=False),
                     sa.PrimaryKeyConstraint('id'),
                     sa.UniqueConstraint('district', 'school', 'grade', 'class_name', 'name', 'gender', 'dob')

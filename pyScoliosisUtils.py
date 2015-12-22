@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # !/bin/env python
 
+import unittest
+
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import text
 from xlwt import Workbook
 from xlrd import *
 import sqlalchemy as sa
@@ -23,9 +26,13 @@ DB_NAME = 'data.db'
 # TODO load distinct Classes to Classes drop down
 # TODO Change the drop down content based on user selection
 # TODO improve Search functionality
+# TODO add pagenate functionality to the table view
 
-def create_database():
-    engine = create_engine('sqlite:///./data.db')
+def create_database(env=None):
+    if env is None:
+        engine = create_engine('sqlite:///./data.db')
+    else:
+        engine = create_engine('sqlite:///./data-dev.db')
     metadata = MetaData(engine)
 
     patients = Table('patients', metadata,
@@ -36,7 +43,7 @@ def create_database():
                      sa.Column('grade', sa.Unicode(length=20), nullable=True),
                      sa.Column('class_name', sa.Unicode(length=10), nullable=True),
                      sa.Column('gender', sa.Unicode(length=5), nullable=True),
-                     sa.Column('dob', sa.Date(), nullable=True),
+                     sa.Column('dob', sa.Unicode(20), nullable=True),
                      sa.Column('contact_info', sa.Unicode(length=20), nullable=True),
                      sa.Column('height', sa.Float(), nullable=True),
                      sa.Column('weight', sa.Float(), nullable=True),
@@ -46,13 +53,14 @@ def create_database():
                      sa.Column('fat_type', sa.Unicode(length=10), nullable=True),
                      sa.Column('basic_metabolism', sa.Integer(), nullable=True),
                      sa.Column('measured_angle', sa.Float(), nullable=True),
-                     sa.Column('x_ray_num', sa.Unicode(), nullable=True),
-                     sa.Column('cobb_section', sa.Unicode(length=20), nullable=True),
-                     sa.Column('cobb_degree', sa.Float(), nullable=True),
+                     sa.Column('xraynum', sa.Unicode(), nullable=True),
+                     sa.Column('cobbsection', sa.Unicode(length=20), nullable=True),
+                     sa.Column('cobbdegree', sa.Float(), nullable=True),
                      sa.Column('is_checked', sa.Boolean(), nullable=True),
                      sa.PrimaryKeyConstraint('id'),
                      sa.UniqueConstraint('district', 'school', 'grade', 'class_name', 'name', 'gender', 'dob'))
     metadata.create_all()
+    return engine
 
 
 class ScoliosisUtils:
@@ -108,10 +116,16 @@ class ScoliosisUtils:
     def load_all_patients(self):
         session = self.get_session()
         data = session.query(Patient).all()
-        r = []
-        for each in data:
-            r.append(each.to_list())
-        return r
+        # r = []
+        # for each in data:
+        #     r.append(each.to_list())
+        # return r
+        return data
+
+    def load_all_checked_patients(self, condition=True):
+        session = self.get_session()
+        data = session.query(Patient).filter(Patient.is_checked == condition).all()
+        return data
 
     def export_to_excel(self, filename, data):
         book = Workbook()
@@ -125,14 +139,65 @@ class ScoliosisUtils:
 
         book.save(filename)
 
-    def get_distinct_areas(self):
+    def save_patient(self, patient):
+        self.get_session().add(patient)
+        self.session.flush()
+        self.session.commit()
+
+    def get_distinct_districts(self):
+        sql = 'SELECT DISTINCT(district) FROM patients'
+        s = text(sql)
+        districts = self.get_session().execute(s).fetchall()
+        return districts
+
+    def get_distinct_schools(self, district=None):
+        sql = 'SELECT DISTINCT(school) FROM patients'
+        if district is not None:
+            sql = 'SELECT DISTINCT(school) FROM patients WHERE district = :district'
+            schools = self.get_session().execute(text(sql), {'district': district}).fetchall()
+            print text(sql)
+            return schools
+        # print sql, ' WHERE district = ', district
+        print text(sql)
+        schools = self.get_session().execute(text(sql)).fetchall()
+        return schools
+
+    def get_distinct_grade(self, school=None):
         pass
 
-    def get_distinct_schools(self, area='all'):
+    def get_distinct_classes(self, school=None, grade=None):
         pass
 
-    def get_distinct_grade(self, school='all'):
+
+class TestUtils(unittest.TestCase):
+    def setUp(self):
+        self.utils = ScoliosisUtils()
+
+    def test_get_distinct_districts(self):
+        districts = self.utils.get_distinct_districts()
+        # districts = r.fetchall()
+        # print districts
+        self.districts = districts
+        self.assertGreaterEqual(len(districts), 0)
+
+    def test_get_distinct_schools(self):
+        schools = self.utils.get_distinct_schools()
+        # schools = r.fetchall()
+        # print schools
+        # print len(schools)
+        self.schools = schools
+        self.assertGreater(len(schools), 0)
+
+    def test_get_distinct_schools_by_district(self):
+        district = list(self.utils.get_distinct_districts()[1])[0]
+        print unicode(district)
+        schools = self.utils.get_distinct_schools(district=unicode(district))
+        # print schools
+        print len(schools)
+        self.assertGreaterEqual(len(schools), 0)
+
+    def test_get_distinct_grade(self):
         pass
 
-    def get_distinct_classes(self, school='all', grade='all'):
+    def test_get_distinct_classes(self):
         pass
