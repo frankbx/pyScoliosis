@@ -40,21 +40,41 @@ class MainForm(ui.MainFormBase):
     def __init__(self):
         ui.MainFormBase.__init__(self, None)
         self.util = pyScoliosisUtils.ScoliosisUtils()
-        self.data = self.util.load_all_patients()
-        self.patientDataTable.SetRowLabelSize(0)
-        self.setTable(self.data)
-
-        # TODO need to refactor below into separate functions
-        districts = self.util.get_distinct_districts()
-        self.district_choice.Append(u"全部区")
-        self.school_choice.Append(u'全部学校')
-        self.grade_choice.Append(u'全部年级')
+        self.data = []
+        self.filter_table()
+        # self.grade_choice.Append(u'全部年级')
         self.class_choice.Append(u'全部班级')
-        for each in districts:
+        self.districts = []
+        self.schools = []
+        self.grades = []
+        self.clear_grade()
+        self.update_districts()
+        self.update_schools()
+
+    def update_districts(self):
+        self.districts = self.util.get_distinct_districts()
+        self.district_choice.Append(u"全部区")
+        for each in self.districts:
             self.district_choice.Append(each)
-        schools = self.util.get_distinct_schools()
-        for each in schools:
+
+    def update_schools(self, district=None):
+        self.school_choice.Clear()
+        self.school_choice.Append(u'全部学校')
+        self.schools = self.util.get_distinct_schools(district)
+        for each in self.schools:
             self.school_choice.Append(each)
+
+    def update_grades(self, school=None):
+        self.grade_choice.Clear()
+        self.grade_choice.Append(u'全部年级')
+        self.grades = self.util.get_distinct_grade((school))
+        for each in self.grades:
+            self.grade_choice.Append(each)
+
+    def filter_table(self, district=None, school=None, grade=None, class_name=None, name=None, is_checked=None):
+        self.data = self.util.load_patients_by_condition(district, school, grade, class_name, name, is_checked)
+        self.setTable(self.data)
+        # pass
 
     def choose_district(self, event):
         '''
@@ -62,7 +82,17 @@ class MainForm(ui.MainFormBase):
         1. Update School dropdown list to include only schools in the district
         2. Update Grid data to include only patients belong to this district
         '''
-        pass
+        id = self.district_choice.CurrentSelection
+        # print "id", id
+        if id > 0:
+            self.update_schools(self.districts[id - 1])
+            self.filter_table(district=self.districts[id - 1])
+        else:
+            self.update_schools()
+            self.data = self.util.load_patients_by_condition()
+            self.patientDataTable.SetRowLabelSize(0)
+            self.setTable(self.data)
+        self.clear_grade()
 
     def choose_school(self, event):
         '''
@@ -70,19 +100,39 @@ class MainForm(ui.MainFormBase):
         1. Load distinct grade values belong to this school
         2. Update Grid data to include only patients belong to this school
         '''
-        pass
+        id = self.school_choice.CurrentSelection
+        if id > 0:
+            self.update_grades(self.schools[id - 1])
+            self.filter_table(school=self.schools[id - 1])
+        else:
+            i = self.district_choice.CurrentSelection
+            self.update_schools(self.districts[i - 1])
+            self.filter_table(district=self.districts[i - 1])
+            self.clear_grade()
 
     def choose_grade(self, event):
-        pass
+        grade_id = self.grade_choice.CurrentSelection
+        school_id = self.school_choice.CurrentSelection
+        if grade_id > 0:
+            self.filter_table(school=self.schools[school_id - 1], grade=self.grades[grade_id - 1])
+        else:
+            self.filter_table(school=self.schools[school_id - 1])
 
     def choose_class(self, event):
         pass
+
+    def clear_grade(self):
+        self.grades = []
+        self.grade_choice.Clear()
+        self.grade_choice.Append("全部年级")
 
     def setTable(self, d):
         table = PatientTable(d)
         self.patientDataTable.SetTable(table)
         self.patientDataTable.SetSelectionMode(wx.grid.Grid.SelectRows)
-        self.patientDataTable.AutoSize()
+        self.patientDataTable.SetRowLabelSize(0)
+        # 取消注释下面这句会引起大数据量时程序缓慢
+        # self.patientDataTable.AutoSize()
         self.patientDataTable.Refresh()
         self.Layout()
         self.stbStatus.SetStatusText(u"当前显示记录数：" + str(len(self.data)), 0)
@@ -101,14 +151,14 @@ class MainForm(ui.MainFormBase):
             self.data[row].cobbdegree = cobbDegree
             self.data[row].is_checked = True
             self.util.save_patient(self.data[row])
-            self.data = self.util.load_all_patients()
+            self.data = self.util.load_patients_by_condition()
             self.setTable(self.data)
         else:
             pass
         checkpatientdialog.Destroy()
 
     def onShowUncheckedOnly(self, event):
-        self.data = self.util.load_all_checked_patients(False)
+        self.data = self.util.load_patients_by_condition(is_checked=False)
         if self.cbxUnchecked.GetValue():
             self.cbxChecked.SetValue(False)
             # for each in self.util.load_all_patients():
@@ -118,7 +168,7 @@ class MainForm(ui.MainFormBase):
         # pass
 
     def onShowCheckedOnly(self, event):
-        self.data = self.util.load_all_checked_patients(True)
+        self.data = self.util.load_patients_by_condition(is_checked=True)
         if self.cbxChecked.GetValue():
             self.cbxUnchecked.SetValue(False)
             # for each in self.util.load_all_patients():
@@ -127,15 +177,10 @@ class MainForm(ui.MainFormBase):
         self.setTable(self.data)
 
     def onShowAll(self, event):
-        self.data = self.util.load_all_patients()
+        self.data = self.util.load_patients_by_condition()
         self.setTable(self.data)
         self.cbxUnchecked.SetValue(False)
         self.cbxChecked.SetValue(False)
-
-    def filter_table(self, filter_str):
-        # self.data = execute_query(filter_str)
-        # self.setTable(self.data)
-        pass
 
     def onExportClick(self, event):
         wildcard = u"Excel 文件 (*.xls)|*.xls|所有文件 (*.*)|*.*"
@@ -191,7 +236,7 @@ class MainForm(ui.MainFormBase):
                 msg_duplicate = ''
                 msg_errors = ''
                 msg.Destroy()
-        self.data = self.util.load_all_patients()
+        self.data = self.util.load_patients_by_condition()
         self.setTable(self.data)
 
 

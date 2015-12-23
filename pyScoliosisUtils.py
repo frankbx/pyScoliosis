@@ -18,9 +18,6 @@ column_labels = [u"编号", u"区域", u"学校", u"年级", u"班级", u"姓名
 DB_NAME = 'data.db'
 
 
-# TODO load distinct Grade to Grade drop down
-# TODO load distinct Classes to Classes drop down
-# TODO Change the drop down content based on user selection
 # TODO improve Search functionality
 # TODO add pagenate functionality to the table view
 
@@ -109,18 +106,24 @@ class ScoliosisUtils:
     def append_to_errors(self, l):
         self.data_errors.append(l)
 
-    def load_all_patients(self):
+    def load_patients_by_condition(self, district=None, school=None, grade=None, class_name=None, name=None,
+                                   is_checked=None):
         session = self.get_session()
-        data = session.query(Patient).all()
-        # r = []
-        # for each in data:
-        #     r.append(each.to_list())
-        # return r
-        return data
-
-    def load_all_checked_patients(self, condition=True):
-        session = self.get_session()
-        data = session.query(Patient).filter(Patient.is_checked == condition).all()
+        query = session.query(Patient)
+        if district is not None:
+            query = query.filter(Patient.district == district)
+        if school is not None:
+            query = query.filter(Patient.school == school)
+        if grade is not None:
+            query = query.filter(Patient.grade == grade)
+        if class_name is not None:
+            query = query.filter(Patient.class_name == class_name)
+        if name is not None:
+            query = query.filter(Patient.name == name)
+        if is_checked is not None:
+            query = query.filter(Patient.is_checked == is_checked)
+        data = query.all()
+        # print "length", len(data)
         return data
 
     def export_to_excel(self, filename, data):
@@ -141,8 +144,6 @@ class ScoliosisUtils:
         self.session.commit()
 
     def get_distinct_districts(self):
-        # sql = 'SELECT DISTINCT(district) FROM patients'
-        # s = text(sql)
         districts = self.get_session().query(distinct(Patient.district)).all()
         return [each[0] for each in districts]
 
