@@ -42,20 +42,23 @@ class MainForm(ui.MainFormBase):
         self.util = pyScoliosisUtils.ScoliosisUtils()
         self.data = []
         self.filter_table()
-        # self.grade_choice.Append(u'全部年级')
+        self.grade_choice.Append(u'全部年级')
         self.class_choice.Append(u'全部班级')
         self.districts = []
         self.schools = []
         self.grades = []
-        self.clear_grade()
+        # self.clear_grade()
         self.update_districts()
         self.update_schools()
+        self.grade_choice.SetSelection(0)
+        self.class_choice.SetSelection(0)
 
     def update_districts(self):
         self.districts = self.util.get_distinct_districts()
         self.district_choice.Append(u"全部区")
         for each in self.districts:
             self.district_choice.Append(each)
+        self.district_choice.SetSelection(0)
 
     def update_schools(self, district=None):
         self.school_choice.Clear()
@@ -63,6 +66,7 @@ class MainForm(ui.MainFormBase):
         self.schools = self.util.get_distinct_schools(district)
         for each in self.schools:
             self.school_choice.Append(each)
+        self.school_choice.SetSelection(0)
 
     def update_grades(self, school=None):
         self.grade_choice.Clear()
@@ -70,6 +74,7 @@ class MainForm(ui.MainFormBase):
         self.grades = self.util.get_distinct_grade((school))
         for each in self.grades:
             self.grade_choice.Append(each)
+        self.grade_choice.SetSelection(0)
 
     def filter_table(self, district=None, school=None, grade=None, class_name=None, name=None, is_checked=None):
         self.data = self.util.load_patients_by_condition(district, school, grade, class_name, name, is_checked)
@@ -132,7 +137,7 @@ class MainForm(ui.MainFormBase):
         self.patientDataTable.SetSelectionMode(wx.grid.Grid.SelectRows)
         self.patientDataTable.SetRowLabelSize(0)
         # 取消注释下面这句会引起大数据量时程序缓慢
-        # self.patientDataTable.AutoSize()
+        self.patientDataTable.AutoSize()
         self.patientDataTable.Refresh()
         self.Layout()
         self.stbStatus.SetStatusText(u"当前显示记录数：" + str(len(self.data)), 0)
